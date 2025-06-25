@@ -1,9 +1,11 @@
 import * as z from "zod";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch } from "react-redux";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,6 +27,9 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 
+import { useLoginMutation } from "../../services/auth.js";
+import { setCredentials } from "../../app/features/auth.js";
+
 const loginSchema = z.object({
 	email: z.string().email({
 		message: "Please enter a valid email address.",
@@ -36,6 +41,10 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
 	const [showPassword, setShowPassword] = useState(false);
+	const [login, { data, isLoading }] = useLoginMutation();
+
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
 
 	const form = useForm({
 		resolver: zodResolver(loginSchema),
@@ -45,18 +54,20 @@ export default function LoginPage() {
 		},
 	});
 
-	function onSubmit(values) {
-		console.log(values);
-		// Handle login logic here
+	async function onSubmit(values) {
+		try {
+			const res = await login(values).unwrap();
+			dispatch(setCredentials(res));
+			toast.success(res?.message);
+			navigate("/", { replace: true });
+		} catch (err) {
+			console.log("Error in Login, onSubmit : ", err);
+			toast.error(err?.data?.message || "Login error");
+		}
 	}
 
 	function handleGoogleLogin() {
 		console.log("Google login clicked");
-		// Handle Google login logic here
-	}
-	
-	function handleLogin() {
-		console.log("Login clicked");
 		// Handle Google login logic here
 	}
 
@@ -164,8 +175,12 @@ export default function LoginPage() {
 							<Button
 								type='submit'
 								className='w-full'
-								onClick={handleLogin}>
-								Login
+								disabled={isLoading}>
+								{isLoading ? (
+									<LoaderCircle className='animate-spin' />
+								) : (
+									"Login"
+								)}
 							</Button>
 						</form>
 					</Form>

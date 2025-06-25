@@ -9,6 +9,9 @@ import OTPVerification from "./pages/auth/OTPVerification.jsx";
 
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
+import AuthProvider from "./provider/AuthProvider";
+import { RedirectAuthenticatedUser,ProtectedUnverifiedOnly } from "./provider/ProtectRoute.jsx";
+
 const App = () => {
 	const router = createBrowserRouter([
 		{
@@ -19,33 +22,33 @@ const App = () => {
 				{
 					index: true,
 					element: (
-						<>
+						<AuthProvider>
 							<Home />
-						</>
+						</AuthProvider>
 					),
 				},
 				{
 					path: "/login",
 					element: (
-						<>
+						<RedirectAuthenticatedUser>
 							<Login />
-						</>
+						</RedirectAuthenticatedUser>
 					),
 				},
 				{
 					path: "/register",
 					element: (
-						<>
+						<RedirectAuthenticatedUser>
 							<Register />
-						</>
+						</RedirectAuthenticatedUser>
 					),
 				},
 				{
 					path: "/verifyEmail",
 					element: (
-						<>
+						<ProtectedUnverifiedOnly>
 							<OTPVerification />
-						</>
+						</ProtectedUnverifiedOnly>
 					),
 				},
 			],

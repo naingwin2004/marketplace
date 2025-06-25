@@ -1,5 +1,8 @@
 import * as z from "zod";
+import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
@@ -26,6 +29,12 @@ import {
 	InputOTPSeparator,
 } from "@/components/ui/input-otp";
 
+import {
+	useResendOtpMutation,
+	useVerifyEmailMutation,
+} from "@/services/auth.js";
+import { updateUser } from "@/app/features/auth.js";
+
 const otpSchema = z.object({
 	otp: z
 		.string()
@@ -34,6 +43,13 @@ const otpSchema = z.object({
 });
 
 const OTPVerification = () => {
+	const naviage = useNavigate();
+	const dispatch = useDispatch();
+	const email = useSelector((state) => state.auth?.user?.email);
+	const [resendMutation, { isLoading: resendLoading }] =
+		useResendOtpMutation();
+	const [verifyEmailMutation, { isLoading }] = useVerifyEmailMutation();
+
 	const form = useForm({
 		resolver: zodResolver(otpSchema),
 		defaultValues: {
@@ -41,23 +57,36 @@ const OTPVerification = () => {
 		},
 	});
 
-	function onSubmit(values) {
-		console.log(values);
+	async function onSubmit(values) {
 		// Handle login logic here
+		const payloads = { ...values, email };
+		try {
+			const res = await verifyEmailMutation(payloads).unwrap();
+			toast.success(res?.message);
+			dispatch(updateUser({ isVerified: true }));
+			naviage("/");
+		} catch (err) {
+			console.log("Error in OTPVerification, fn=> onSubmit", err);
+			toast.error(err?.data?.message || "Failer");
+		}
 	}
 
-	function handleResend() {
-		console.log("resend");
+	async function handleResend() {
 		// Handle login logic here
-	}
-
-	function handleOtp() {
-		console.log("otp");
-		// Handle login logic here
+		try {
+			const res = await resendMutation({ email }).unwrap();
+			toast.success(res?.message);
+			naviage("/verifyEmail");
+		} catch (err) {
+			console.log("Error in OTPVerification, fn=> handleResend", err);
+			toast.error(err?.data?.message || "Failer");
+		}
 	}
 
 	return (
-		<div className='h-full flex justify-center items-center'>
+		<div className='h-full flex flex-col justify-center items-center space-y-4'>
+			<div>{resendLoading && "Sending OTP ..."}</div>
+
 			<Card className='w-full max-w-md'>
 				<CardHeader className='space-y-1'>
 					<CardTitle className='text-2xl font-bold text-center'>
@@ -106,7 +135,7 @@ const OTPVerification = () => {
 							<Button
 								type='submit'
 								className='w-full'
-								onClick={handleOtp}>
+								disabled={isLoading}>
 								Submit
 							</Button>
 						</form>
@@ -118,6 +147,7 @@ const OTPVerification = () => {
 						<Button
 							variant='link'
 							className='p-0 h-auto'
+							disabled={resendLoading}
 							onClick={handleResend}>
 							Resend
 						</Button>

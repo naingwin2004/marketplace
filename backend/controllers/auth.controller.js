@@ -39,7 +39,7 @@ export const register = async (req, res) => {
 			email,
 			password: hashedPassword, // Store the hashed password
 			verificationToken: hashedOtp, // Store the hashed OTP for email verification
-			verificationTokenExpiresAt: Date.now() + 60 * 1000, // Set expiration time for OTP (15 minutes)
+			verificationTokenExpiresAt: Date.now() + 15 * 60 * 1000, // Set expiration time for OTP (15 minutes)
 		});
 
 		// Save the user in the database
@@ -105,6 +105,11 @@ export const login = async (req, res) => {
 
 		// Generate  token for  API requests.
 		const token = await generateAccessToken({
+			userId: user._id,
+			role: user.role,
+		});
+
+		await generateRefreshTokenAndSetCookie(res, {
 			userId: user._id,
 			role: user.role,
 		});
@@ -180,7 +185,7 @@ export const resendOtp = async (req, res) => {
 	const { email } = req.body;
 	try {
 		// Check if any required fields are missing
-		if (!email || !otp) {
+		if (!email) {
 			return res.status(400).json({ message: "All fields are required" });
 		}
 
@@ -214,7 +219,7 @@ export const resendOtp = async (req, res) => {
 		const hashedOtp = await bcrypt.hash(otp, 10);
 
 		user.verificationToken = hashedOtp; // Store the hashed OTP for email verification
-		user.verificationTokenExpiresAt = Date.now() + 60 * 1000; // Set expiration time for OTP (15 minutes)
+		user.verificationTokenExpiresAt = Date.now() + 15 * 60 * 1000; // Set expiration time for OTP (15 minutes)
 		await user.save();
 
 		// Email sending

@@ -1,9 +1,11 @@
 import * as z from "zod";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
-import { Eye, EyeOff } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Link, useNavigate } from "react-router-dom";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,11 +27,19 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 
+import { useRegisterMutation } from "@/services/auth.js";
+import { setCredentials } from "@/app/features/auth.js";
+
 const registerSchema = z
 	.object({
-		username: z.string().min(2, {
-			message: "Username must be at least 2 characters.",
-		}),
+		username: z
+			.string()
+			.min(2, {
+				message: "Username must be at least 2 characters.",
+			})
+			.max(20, {
+				message: "Username must be at most 20 characters.",
+			}),
 
 		email: z.string().email({
 			message: "Please enter a valid email address.",
@@ -57,8 +67,14 @@ const registerSchema = z
 	});
 
 export default function RegisterPage() {
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+	const [registerMutation, { isLoading, data, error }] =
+		useRegisterMutation();
 
 	const form = useForm({
 		resolver: zodResolver(registerSchema),
@@ -70,19 +86,23 @@ export default function RegisterPage() {
 		},
 	});
 
-	function onSubmit(values) {
+	async function onSubmit(values) {
+		// confirmPassword not send to server
 		const { confirmPassword, ...data } = values;
 		console.log(data);
-		// Handle registration logic here
+		try {
+			const res = await registerMutation(data).unwrap();
+			dispatch(setCredentials(res));
+			toast.success(res?.message);
+			navigate("/verifyEmail", { replace: true });
+		} catch (err) {
+			console.log("Error in Register, onSubmit : ", err);
+			toast.error(err?.data?.message || "Register error");
+		}
 	}
 
 	function handleGoogleSignup() {
 		console.log("Google signup clicked");
-		// Handle Google signup logic here
-	}
-
-	function handleRegister() {
-		console.log("Register clicked");
 		// Handle Google signup logic here
 	}
 
@@ -241,8 +261,12 @@ export default function RegisterPage() {
 							<Button
 								type='submit'
 								className='w-full'
-								onClick={handleRegister}>
-								Create Account
+								disabled={isLoading}>
+								{isLoading ? (
+									<LoaderCircle className='animate-spin' />
+								) : (
+									"Create Account"
+								)}
 							</Button>
 						</form>
 					</Form>

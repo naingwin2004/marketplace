@@ -1,5 +1,6 @@
-import { Link } from "react-router-dom";
-
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
 import {
 	PackagePlus,
 	Boxes,
@@ -25,6 +26,9 @@ import {
 	SidebarMenuItem,
 	SidebarRail,
 } from "@/components/ui/sidebar";
+
+import { useLogoutMutation } from "@/services/auth.js";
+import { logout } from "@/app/features/auth.js";
 
 // Main navigation items
 const mainNavItems = [
@@ -70,9 +74,22 @@ const authItems = [
 ];
 
 export function AppSidebar() {
-	const handleLogout = () => {
-		alert("Logout clicked! Add your logout logic here.");
-		console.log("Logging out...");
+	const dispatch = useDispatch();
+	const navigate = useNavigate();
+	const token = useSelector((state) => state.auth.token);
+
+	const [logoutMutation] = useLogoutMutation();
+
+	const handleLogout = async () => {
+		try {
+			const res = await logoutMutation().unwrap();
+			dispatch(logout());
+			toast.success(res?.message || "Logged out successfully");
+			navigate("/login");
+		} catch (err) {
+			console.error("Logout error:", err);
+			toast.error(err.data?.message || "Failed to logout");
+		}
 	};
 
 	return (
@@ -108,11 +125,11 @@ export function AppSidebar() {
 					<SidebarGroupContent>
 						<SidebarMenu>
 							{mainNavItems.map((item) => (
-								<SidebarMenuItem key={item.name}>
+								<SidebarMenuItem key={item?.name}>
 									<SidebarMenuButton asChild>
-										<Link to={item.path}>
+										<Link to={item?.path}>
 											<item.icon />
-											<span>{item.name}</span>
+											<span>{item?.name}</span>
 										</Link>
 									</SidebarMenuButton>
 								</SidebarMenuItem>
@@ -122,35 +139,39 @@ export function AppSidebar() {
 				</SidebarGroup>
 
 				{/* Authentication */}
-				<SidebarGroup>
-					<SidebarGroupLabel>Account</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{authItems.map((item) => (
-								<SidebarMenuItem key={item.name}>
-									<SidebarMenuButton asChild>
-										<Link to={item.path}>
-											<item.icon />
-											<span>{item.name}</span>
-										</Link>
-									</SidebarMenuButton>
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
+				{!token && (
+					<SidebarGroup>
+						<SidebarGroupLabel>Account</SidebarGroupLabel>
+						<SidebarGroupContent>
+							<SidebarMenu>
+								{authItems.map((item) => (
+									<SidebarMenuItem key={item?.name}>
+										<SidebarMenuButton asChild>
+											<Link to={item?.path}>
+												<item.icon />
+												<span>{item?.name}</span>
+											</Link>
+										</SidebarMenuButton>
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
+				)}
 			</SidebarContent>
 
-			<SidebarFooter>
-				<SidebarMenu>
-					<SidebarMenuItem>
-						<SidebarMenuButton onClick={handleLogout}>
-							<LogOut />
-							<span>Logout</span>
-						</SidebarMenuButton>
-					</SidebarMenuItem>
-				</SidebarMenu>
-			</SidebarFooter>
+			{token && (
+				<SidebarFooter>
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton onClick={handleLogout}>
+								<LogOut />
+								<span>Logout</span>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					</SidebarMenu>
+				</SidebarFooter>
+			)}
 
 			<SidebarRail />
 		</Sidebar>
