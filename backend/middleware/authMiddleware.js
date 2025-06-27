@@ -20,6 +20,9 @@ export const authMiddleware = (req, res, next) => {
 		next();
 	} catch (err) {
 		console.log("Error in authMiddleware:", err.message);
+		if (err.name === "JsonWebTokenError" ) {
+			return res.status(403).json({ message: "Invalid Token" });
+		}
 		if (err.name === "TokenExpiredError") {
 			return res.status(403).json({ message: "TokenExpired" });
 		}

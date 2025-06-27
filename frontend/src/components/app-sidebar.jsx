@@ -85,7 +85,7 @@ export function AppSidebar() {
 			const res = await logoutMutation().unwrap();
 			dispatch(logout());
 			toast.success(res?.message || "Logged out successfully");
-			navigate("/login");
+			navigate("/login", { replace: true });
 		} catch (err) {
 			console.error("Logout error:", err);
 			toast.error(err.data?.message || "Failed to logout");

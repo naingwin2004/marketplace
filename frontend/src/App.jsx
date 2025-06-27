@@ -6,11 +6,17 @@ import Home from "./layout/Home.jsx";
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
 import OTPVerification from "./pages/auth/OTPVerification.jsx";
+import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
+import ResetPassword from "./pages/auth/ResetPassword.jsx";
 
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 import AuthProvider from "./provider/AuthProvider";
-import { RedirectAuthenticatedUser,ProtectedUnverifiedOnly } from "./provider/ProtectRoute.jsx";
+
+import {
+	RedirectAuthenticatedUser,
+	ProtectedUnverifiedOnly,
+} from "./provider/ProtectRoute.jsx";
 
 const App = () => {
 	const router = createBrowserRouter([
@@ -46,9 +52,27 @@ const App = () => {
 				{
 					path: "/verifyEmail",
 					element: (
-						<ProtectedUnverifiedOnly>
-							<OTPVerification />
-						</ProtectedUnverifiedOnly>
+						<AuthProvider>
+							<ProtectedUnverifiedOnly>
+								<OTPVerification />
+							</ProtectedUnverifiedOnly>
+						</AuthProvider>
+					),
+				},
+				{
+					path: "/forgot-password",
+					element: (
+						<>
+							<ForgotPassword />
+						</>
+					),
+				},
+				{
+					path: "/reset-password/:token",
+					element: (
+						<>
+							<ResetPassword />
+						</>
 					),
 				},
 			],

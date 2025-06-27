@@ -62,7 +62,7 @@ export default function LoginPage() {
 			navigate("/", { replace: true });
 		} catch (err) {
 			console.log("Error in Login, onSubmit : ", err);
-			toast.error(err?.data?.message || "Login error");
+			toast.error(err?.message || err?.data?.message || "Login error");
 		}
 	}
 
