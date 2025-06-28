@@ -13,6 +13,8 @@ import {
 	verifyEmail,
 	resendOtp,
 	refreshToken,
+	forgotPassword,
+	resetPassword,
 } from "../controllers/authService.js";
 
 const authRouter = express.Router();
@@ -21,6 +23,8 @@ authRouter.post("/login", login);
 authRouter.post("/logout", logout);
 authRouter.post("/register", register);
 authRouter.post("/refreshToken", refreshToken);
+authRouter.post("/forgotPassword", forgotPassword);
+authRouter.post("/resetPassword/:token", resetPassword);
 authRouter.post("/verifyEmail", authMiddleware, verifyEmail);
 authRouter.post("/resendOtp", authMiddleware, resendOtp);
 

@@ -1,8 +1,14 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto"; // from node
 
 import User from "../models/user.js";
 import { generateAccessToken } from "../utils/jwt.js";
+
+import {
+	sendVerificationEmail,
+	sendResetPassword,
+} from "../utils/nodemailer.js";
 
 export const verifyEmail = async (req, res) => {
 	const { email, otp } = req.body;
@@ -137,5 +143,98 @@ export const refreshToken = async (req, res) => {
 		}
 
 		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const forgotPassword = async (req, res) => {
+	const { email } = req.body;
+	try {
+		if (!email) {
+			return res.status(400).json({
+				message: "All fields are required",
+			});
+		}
+		const user = await User.findOne({ email });
+		if (!user) {
+			return res.status(404).json({
+				message: "User doesn't exists",
+			});
+		}
+
+		if (user?.resetPasswordExpiresAt > Date.now()) {
+			return res.status(400).json({
+				message:
+					"A reset link has already been sent. Please check your email.",
+			});
+		}
+
+		const resetPasswordToken = crypto.randomBytes(32).toString("hex");
+		const hashedToken = crypto
+			.createHash("sha256")
+			.update(resetPasswordToken)
+			.digest("hex");
+
+		user.resetPasswordToken = hashedToken;
+		user.resetPasswordExpiresAt = Date.now() + 60 * 60 * 1000; // 1h
+
+		await user.save();
+
+		await sendResetPassword(res, resetPasswordToken, email);
+
+		return res.status(201).json({
+			message: "We've sent the password reset link to your email",
+		});
+	} catch (err) {
+		console.log("Error in forgotPassword :", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const resetPassword = async (req, res) => {
+	const { token } = req.params;
+	const { password, confirmPassword } = req.body;
+
+	try {
+		if (!token || !password) {
+			return res
+				.status(400)
+				.json({ message: "Token and password required" });
+		}
+		
+		if (password !== confirmPassword) {
+			return res
+				.status(400)
+				.json({ message: "Passwords don't match" });
+		}
+
+		// Hash the token to match the DB value
+		const hashedToken = crypto
+			.createHash("sha256")
+			.update(token)
+			.digest("hex");
+
+		const user = await User.findOne({
+			resetPasswordToken: hashedToken,
+			resetPasswordExpiresAt: { $gt: Date.now() },
+		});
+
+		if (!user) {
+			return res
+				.status(400)
+				.json({ message: "Invalid or expired token" });
+		}
+
+		const hashedPassword = await bcrypt.hash(password, 10);
+		user.password = hashedPassword;
+
+		user.resetPasswordToken = undefined;
+		user.resetPasswordExpiresAt = undefined;
+
+		await user.save();
+
+		return res.status(200).json({ message: "Password reset successful" });
+	} catch (error) {
+		console.error("Reset password error:", error.message);
+		return res.status(500).json({ message: "Server error" });
 	}
 };

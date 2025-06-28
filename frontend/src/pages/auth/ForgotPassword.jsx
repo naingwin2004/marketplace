@@ -1,4 +1,5 @@
 import * as z from "zod";
+import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +23,8 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 
+import { useForgotPasswordMutation } from "@/services/auth.js";
+
 const forgotPasswordSchema = z.object({
 	email: z.string().email({ message: "Please enter a valid email address." }),
 });
@@ -29,18 +32,27 @@ const forgotPasswordSchema = z.object({
 const ForgotPassword = () => {
 	const navigate = useNavigate();
 
+
 	const form = useForm({
 		resolver: zodResolver(forgotPasswordSchema),
 		defaultValues: {
 			email: "",
 		},
 	});
-	const isLoading = false;
 
-	function onSubmit(values) {
-		console.log(values);
+	const [forgotPasswordMutation, { isLoading }] = useForgotPasswordMutation();
+
+	async function onSubmit(values) {
+		try {
+			const res = await forgotPasswordMutation(values).unwrap();
+			toast.success(res?.message);
+			navigate("/login", { replace: true });
+		} catch (err) {
+			console.log("Error in ForgotPassword, onSubmit : ", err);
+			toast.error(err?.message || err?.data?.message || "Failer");
+		}
 	}
-	
+
 	return (
 		<div className='h-full flex flex-col justify-center items-center space-y-4'>
 			<div className='relative w-full max-w-md'>

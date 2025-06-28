@@ -16,7 +16,25 @@ export const sendVerificationEmail = async (res, email, otp) => {
 			subject: `Verify Your Email`,
 			text: otp,
 		});
-		return info
+		return info;
+	} catch (error) {
+		console.log("Error sending verification email", error);
+		return res.status(400).json({
+			message: "Error sending verification email",
+			error: error.message,
+		});
+	}
+};
+
+export const sendResetPassword = async (res, resetPasswordToken, email) => {
+	try {
+		const info = await transporter.sendMail({
+			from: "naingwin.dev@gmail.com",
+			to: email,
+			subject: `Verify Your Email`,
+			text: `${process.env.CLIENT_URL}/reset-password/${resetPasswordToken}`,
+		});
+		return info;
 	} catch (error) {
 		console.log("Error sending verification email", error);
 		return res.status(400).json({

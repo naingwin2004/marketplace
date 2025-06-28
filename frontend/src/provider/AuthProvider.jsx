@@ -41,12 +41,6 @@ const AuthProvider = ({ children }) => {
 	useEffect(() => {
 		if (isSuccess && data?.user) {
 			dispatch(updateUser(data.user));
-			// Only navigate to home if not already there and user is verified
-			if (data.user.isVerified) {
-				if (location.pathname !== "/") {
-					navigate("/", { replace: true });
-				}
-			}
 		}
 	}, [isSuccess, data?.user, dispatch, navigate]);
 

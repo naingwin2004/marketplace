@@ -64,13 +64,10 @@ export const register = async (req, res) => {
 		return res.status(201).json({
 			message: "User Created Successfully",
 			user: {
-				_id: user._id,
-				username: user.username,
-				email: user.email,
-				avatar: user.avatar,
-				role: user.role,
-				status: user.status,
-				isVerified: user.isVerified,
+				...user._doc,
+				password: undefined,
+				__v: undefined,
+				updatedAt: undefined,
 			},
 			token,
 		});
@@ -118,13 +115,10 @@ export const login = async (req, res) => {
 		return res.status(200).json({
 			message: "login successfully",
 			user: {
-				_id: user._id,
-				username: user.username,
-				email: user.email,
-				avatar: user.avatar,
-				role: user.role,
-				status: user.status,
-				isVerified: user.isVerified,
+				...user._doc,
+				password: undefined,
+				__v: undefined,
+				updatedAt: undefined,
 			},
 			token,
 		});
@@ -133,7 +127,6 @@ export const login = async (req, res) => {
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };
-
 
 export const checkAuth = async (req, res) => {
 	// come from auth middleware
@@ -150,13 +143,10 @@ export const checkAuth = async (req, res) => {
 		return res.status(200).json({
 			message: "User authenticated",
 			user: {
-				_id: user._id,
-				username: user.username,
-				email: user.email,
-				avatar: user.avatar,
-				role: user.role,
-				status: user.status,
-				isVerified: user.isVerified,
+				...user._doc,
+				password: undefined,
+				__v: undefined,
+				updatedAt: undefined,
 			},
 		});
 	} catch (err) {

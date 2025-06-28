@@ -5,6 +5,7 @@ import Home from "./layout/Home.jsx";
 
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
+import Profile from "./pages/auth/Profile.jsx";
 import OTPVerification from "./pages/auth/OTPVerification.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
@@ -73,6 +74,14 @@ const App = () => {
 						<>
 							<ResetPassword />
 						</>
+					),
+				},
+				{
+					path: "/profile",
+					element: (
+						<AuthProvider>
+							<Profile />
+						</AuthProvider>
 					),
 				},
 			],

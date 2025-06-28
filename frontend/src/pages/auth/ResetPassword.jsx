@@ -1,7 +1,10 @@
 import * as z from "zod";
 import { useState } from "react";
+import toast from "react-hot-toast";
 import { useForm } from "react-hook-form";
+import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 
@@ -23,6 +26,8 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../../components/ui/card";
+
+import { useResetPasswordMutation } from "@/services/auth.js";
 
 const confirmPasswordFormSchema = z
 	.object({
@@ -48,9 +53,9 @@ const confirmPasswordFormSchema = z
 
 const ResetPassword = () => {
 	const { token } = useParams();
+	const navigate = useNavigate();
 
-	console.log(token);
-	const isLoading = false;
+	const [resetPasswordMutation, { isLoading }] = useResetPasswordMutation();
 
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,9 +68,20 @@ const ResetPassword = () => {
 		},
 	});
 
-	const onSubmit = async (values) => {
+	async function onSubmit(values) {
 		console.log(values);
-	};
+		try {
+			const res = await resetPasswordMutation({
+				token,
+				values,
+			}).unwrap();
+			toast.success(res?.message);
+			navigate("/login", { replace: true });
+		} catch (err) {
+			console.log("Error in ResetPassword, onSubmit : ", err);
+			toast.error(err?.message || err?.data?.message || "Failer");
+		}
+	}
 
 	return (
 		<div className='h-full flex justify-center items-center'>
