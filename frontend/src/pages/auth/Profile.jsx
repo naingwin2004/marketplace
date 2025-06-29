@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -6,12 +7,26 @@ import { Separator } from "@/components/ui/separator";
 import { Edit, Lock, Mail, Calendar, User } from "lucide-react";
 import { GoogleIcon } from "@/components/GoogleIcon";
 
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog";
+
 import { useCheckAuthQuery } from "@/services/auth.js";
+import EditProfile from "./EditProfile.jsx";
+import ChangePassword from "./ChangePassword.jsx";
 
 export default function ProfileCard() {
 	const { data, error, isError } = useCheckAuthQuery();
 
-	const userData = data.user;
+	const [open, setOpen] = useState(false);
+	const [changePassOpen, setChangePassOpen] = useState(false);
+
+	const userData = data?.user;
 
 	if (error?.error) {
 		return (
@@ -26,14 +41,6 @@ export default function ProfileCard() {
 				<p>{error?.data?.message}</p>
 			</div>
 		);
-	}
-
-	function handleEditProfile() {
-		console.log("EditProfile clicked");
-	}
-
-	function handleChangePassword() {
-		console.log("ChangePassword clicked");
 	}
 
 	return (
@@ -131,22 +138,37 @@ export default function ProfileCard() {
 					<Separator />
 
 					{/* Action Buttons */}
-					<div className='space-y-3'>
-						<Button
-							className='w-full'
-							variant='default'
-							onClick={handleEditProfile}>
-							<Edit className='w-4 h-4 mr-2' />
-							Edit Profile
-						</Button>
 
-						<Button
-							className='w-full bg-transparent'
-							variant='outline'
-							onClick={handleChangePassword}>
-							<Lock className='w-4 h-4 mr-2' />
-							Change Password
-						</Button>
+					<div className='space-y-3'>
+						<Dialog
+							open={open}
+							onOpenChange={setOpen}>
+							<DialogTrigger asChild>
+								<Button
+									className='w-full'
+									variant='default'>
+									<Edit className='w-4 h-4 mr-2' />
+									EditProfile
+								</Button>
+							</DialogTrigger>
+							<EditProfile setOpen={setOpen} />
+						</Dialog>
+
+						<Dialog
+							open={changePassOpen}
+							onOpenChange={setChangePassOpen}>
+							<DialogTrigger asChild>
+								<Button
+									className='w-full bg-transparent'
+									variant='outline'>
+									<Lock className='w-4 h-4 mr-2' />
+									Change Password
+								</Button>
+							</DialogTrigger>
+							<ChangePassword
+								setChangePassOpen={setChangePassOpen}
+							/>
+						</Dialog>
 					</div>
 				</CardContent>
 			</Card>

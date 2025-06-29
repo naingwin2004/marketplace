@@ -62,6 +62,14 @@ export const authApi = createApi({
 			}),
 		}),
 
+		changePassword: builder.mutation({
+			query: (payload) => ({
+				url: "/changePassword",
+				method: "POST",
+				body: payload,
+			}),
+		}),
+
 		checkAuth: builder.query({
 			query: () => "/checkAuth",
 		}),
@@ -76,6 +84,7 @@ export const {
 	useResendOtpMutation,
 	useForgotPasswordMutation,
 	useResetPasswordMutation,
+	useChangePasswordMutation,
 
 	useCheckAuthQuery,
 } = authApi;

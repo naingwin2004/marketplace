@@ -200,11 +200,9 @@ export const resetPassword = async (req, res) => {
 				.status(400)
 				.json({ message: "Token and password required" });
 		}
-		
+
 		if (password !== confirmPassword) {
-			return res
-				.status(400)
-				.json({ message: "Passwords don't match" });
+			return res.status(400).json({ message: "Passwords don't match" });
 		}
 
 		// Hash the token to match the DB value
@@ -235,6 +233,51 @@ export const resetPassword = async (req, res) => {
 		return res.status(200).json({ message: "Password reset successful" });
 	} catch (error) {
 		console.error("Reset password error:", error.message);
+		return res.status(500).json({ message: "Server error" });
+	}
+};
+
+export const changePassword = async (req, res) => {
+	const { email, password, newPassword } = req.body;
+
+	try {
+		if (!email || !password || !newPassword) {
+			return res.status(400).json({
+				message: "All fields are required",
+			});
+		}
+		const user = await User.findOne({ email });
+		if (!user) {
+			return res.status(404).json({
+				message: "User doesn't exists",
+			});
+		}
+		const isMatchPassword = await bcrypt.compare(password, user.password);
+		if (!isMatchPassword) {
+			return res.status(400).json({
+				message: "incorrect password",
+			});
+		}
+
+		const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+		const isMatchNewPassword = await bcrypt.compare(
+			hashedNewPassword,
+			user.password,
+		);
+		if (!isMatchNewPassword) {
+			return res.status(400).json({
+				message: "New password cannot be the same as the old password.",
+			});
+		}
+
+		user.password = hashedNewPassword;
+		await user.save();
+		return res.status(200).json({
+			message: "Password changed successfully",
+		});
+	} catch (error) {
+		console.error("Change password error:", error.message);
 		return res.status(500).json({ message: "Server error" });
 	}
 };

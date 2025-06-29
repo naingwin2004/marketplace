@@ -15,6 +15,7 @@ import {
 	refreshToken,
 	forgotPassword,
 	resetPassword,
+	changePassword
 } from "../controllers/authService.js";
 
 const authRouter = express.Router();
@@ -27,6 +28,7 @@ authRouter.post("/forgotPassword", forgotPassword);
 authRouter.post("/resetPassword/:token", resetPassword);
 authRouter.post("/verifyEmail", authMiddleware, verifyEmail);
 authRouter.post("/resendOtp", authMiddleware, resendOtp);
+authRouter.post("/changePassword", authMiddleware, changePassword);
 
 authRouter.get("/checkAuth", authMiddleware, checkAuth);
 
