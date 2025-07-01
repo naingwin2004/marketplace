@@ -70,6 +70,14 @@ export const authApi = createApi({
 			}),
 		}),
 
+		updatedProfile: builder.mutation({
+			query: (formData) => ({
+				url: "/updatedProfile",
+				method: "PATCH",
+				body: formData,
+			}),
+		}),
+
 		checkAuth: builder.query({
 			query: () => "/checkAuth",
 		}),
@@ -85,6 +93,8 @@ export const {
 	useForgotPasswordMutation,
 	useResetPasswordMutation,
 	useChangePasswordMutation,
+	useUpdatedProfileMutation,
 
 	useCheckAuthQuery,
+	
 } = authApi;

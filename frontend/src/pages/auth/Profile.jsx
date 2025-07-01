@@ -48,9 +48,14 @@ export default function ProfileCard() {
 			<Card className='w-full max-w-md'>
 				<CardHeader>
 					<div className='flex flex-col items-center space-y-2'>
+						<Badge
+							variant='secondary'
+							className='text-xs ml-auto'>
+							{userData?.role.toUpperCase()}
+						</Badge>
 						<Avatar className='w-24 h-24'>
 							<AvatarImage
-								src={userData?.avatar || "/placeholder.svg"}
+								src={userData?.avatar.url || "/placeholder.svg"}
 								alt={userData?.username}
 							/>
 							<AvatarFallback className='text-lg'>
@@ -62,19 +67,16 @@ export default function ProfileCard() {
 							</AvatarFallback>
 						</Avatar>
 						<div>
-							<h2 className='text-2xl font-bold'>
+							<h2 className='text-xl font-bold'>
 								@{userData?.username}
 							</h2>
 						</div>
-						<Badge
-							variant='secondary'
-							className='text-xs ml-auto'>
-							{userData?.role.toUpperCase()}
-						</Badge>
 					</div>
-					<p className='text-muted-foreground text-center'>
-						{userData?.bio || "Your bio here"}
-					</p>
+					<div className='flex justify-center'>
+						<span className='text-muted-foreground'>
+							{userData?.bio || "Your bio here"}
+						</span>
+					</div>
 				</CardHeader>
 
 				<CardContent className='space-y-6'>

@@ -1,9 +1,12 @@
 import { Textarea } from "@/components/ui/textarea";
+import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Camera } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,50 +24,128 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { Camera, User } from "lucide-react";
 
-const defaultValues = {
-	bio: "",
+import {
+	useUpdatedProfileMutation,
+	useCheckAuthQuery,
+} from "@/services/auth.js";
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_IMAGE_TYPES = [
+	"image/jpeg",
+	"image/jpg",
+	"image/png",
+	"image/webp",
+];
+
+const formatBytes = (bytes, decimals = 2) => {
+	if (bytes === 0) return "0 Bytes";
+	const k = 1024;
+	const dm = decimals < 0 ? 0 : decimals;
+	const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
 };
 
 const profileFormSchema = z.object({
+	username: z
+		.string()
+		.min(2, {
+			message: "username must be at least 2 characters.",
+		})
+		.max(30, {
+			message: "username must not be longer than 30 characters.",
+		}),
+	email: z.string().email({
+		message: "Please enter a valid email address.",
+	}),
 	bio: z
 		.string()
 		.max(160, {
 			message: "Bio must not be longer than 160 characters.",
 		})
 		.optional(),
+	avatar: z
+		.instanceof(File, {
+			message: "Please select an image file.",
+		})
+		.optional()
+		.refine((file) => !file || file.size <= MAX_FILE_SIZE, {
+			message: `The image is too large. Please choose an image smaller than ${formatBytes(
+				MAX_FILE_SIZE,
+			)}.`,
+		})
+		.refine((file) => !file || ACCEPTED_IMAGE_TYPES.includes(file.type), {
+			message: "Please upload a valid image file (JPEG, PNG, or WebP).",
+		}),
 });
 
 const EditProfile = ({ setOpen }) => {
-	const [isLoading, setIsLoading] = useState(false)
 	const [previewImage, setPreviewImage] = useState(null);
-	const [image, setImage] = useState(null);
+
 	const imageRef = useRef(null);
+
+	const [updatedProfileMutation, { isLoading }] = useUpdatedProfileMutation();
+	const { refetch } = useCheckAuthQuery();
+
+	const user = useSelector((state) => state.auth.user);
 
 	const form = useForm({
 		resolver: zodResolver(profileFormSchema),
-		defaultValues,
+		defaultValues: {
+			firstName: user?.firstName || "",
+			lastName: user?.lastName || "",
+			username: user?.username || "",
+			email: user?.email || "",
+			bio: user?.bio || "",
+			avatar: undefined,
+		},
 	});
 
 	async function onSubmit(data) {
-    setIsLoading(true)
+		try {
+			const formData = new FormData();
+			formData.append("avatar", data.avatar);
+			formData.append("username", data.username);
+			formData.append("bio", data.bio);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+			const res = await updatedProfileMutation(formData).unwrap();
 
-    console.log("Profile updated:", data)
-    setIsLoading(false)
-    setOpen(false)
-  }
+			toast.success(res?.message || "success");
+			refetch();
+			setOpen(false);
+		} catch (err) {
+			console.log("EditProfile err ", err);
+			toast.error(err.data.message || "failer");
+		}
+	}
 
 	const handleImage = (e) => {
 		const file = e.target.files[0];
 		if (file) {
+			if (file.size > MAX_FILE_SIZE) {
+				const error = `The image is too large. Please choose an image smaller than ${formatBytes(
+					MAX_FILE_SIZE,
+				)}.`;
+				form.setError("avatar", { message: error });
+				return;
+			}
+
+			// File type validation
+			if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
+				const error =
+					"Please upload a valid image file (JPEG, PNG, or WebP).";
+				form.setError("avatar", { message: error });
+				return;
+			}
+
 			const imageUrl = URL.createObjectURL(file);
 			setPreviewImage(imageUrl);
-			setImage(file);
+			form.setValue("avatar", file);
+			form.clearErrors("avatar");
 		}
 	};
+
 	return (
 		<DialogContent className='sm:max-w-[600px] max-h-[80vh] overflow-y-auto'>
 			<DialogHeader>
@@ -75,49 +156,123 @@ const EditProfile = ({ setOpen }) => {
 				</DialogDescription>
 			</DialogHeader>
 
-			{/* Avatar */}
-			<div className='flex justify-center items-center space-x-4'>
-				<Avatar
-					className='h-24 w-24'
-					onClick={() => imageRef.current.click()}>
-					<AvatarImage
-						src={
-							previewImage
-								? previewImage
-								: "/placeholder.svg?height=80&width=80"
-						}
-						className='object-cover'
-						alt='Profile'
-					/>
-					<AvatarFallback>JD</AvatarFallback>
-				</Avatar>
-				<Input
-					type='file'
-					accept='image/*'
-					className='hidden'
-					ref={imageRef}
-					onChange={handleImage}
-				/>
-			</div>
-
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className='space-y-6'>
+					className='space-y-6 max-w-md mx-auto'>
+					{/* Avatar */}
+					<FormField
+						control={form.control}
+						name='avatar'
+						render={({ field }) => (
+							<FormItem className='flex flex-col items-center space-y-2'>
+								<FormLabel>
+									Profile Picture ( Optional )
+								</FormLabel>
+								<FormControl>
+									<div className='flex flex-col items-center gap-4'>
+										<Avatar
+											className='h-24 w-24 cursor-pointer'
+											onClick={() =>
+												imageRef.current?.click()
+											}>
+											<AvatarImage
+												src={
+													previewImage ||
+													user?.avatar?.url ||
+													"/placeholder.svg?height=80&width=80"
+												}
+												className='object-cover'
+												alt='Profile'
+											/>
+											<AvatarFallback>JD</AvatarFallback>
+										</Avatar>
+										<Input
+											type='file'
+											ref={imageRef}
+											onChange={handleImage}
+											accept={ACCEPTED_IMAGE_TYPES.join(
+												",",
+											)}
+											className='hidden'
+										/>
+										<Button
+											type='button'
+											variant='outline'
+											size='sm'
+											onClick={() =>
+												imageRef.current?.click()
+											}>
+											<Camera className='w-4 h-4 mr-2' />
+											Change Photo
+										</Button>
+									</div>
+								</FormControl>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name='username'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>FullName</FormLabel>
+								<FormControl>
+									<Input
+										placeholder='Naing Win'
+										type='text'
+										{...field}
+									/>
+								</FormControl>
+								<FormDescription>
+									Enter your FullName
+								</FormDescription>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name='email'
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel>Email</FormLabel>
+								<FormControl>
+									<Input
+										placeholder='example@gmail.com'
+										type='email'
+										disabled={true}
+										{...field}
+									/>
+								</FormControl>
+								<FormDescription>
+									This is the email address associated with
+									your account.
+								</FormDescription>
+								<FormMessage />
+							</FormItem>
+						)}
+					/>
+
 					<FormField
 						control={form.control}
 						name='bio'
 						render={({ field }) => (
 							<FormItem>
-								<FormLabel>Bio</FormLabel>
+								<FormLabel>Bio ( Optional )</FormLabel>
 								<FormControl>
 									<Textarea
 										placeholder='Tell us a little bit about yourself'
-										className='resize-none'
+										className='resize-none h-20'
 										{...field}
 									/>
 								</FormControl>
-
+								<FormDescription>
+									{field.value?.length || 0}/160 characters
+								</FormDescription>
 								<FormMessage />
 							</FormItem>
 						)}
@@ -131,11 +286,29 @@ const EditProfile = ({ setOpen }) => {
 							Cancel
 						</Button>
 						<Button
-							type='submit'
-							disabled={isLoading}>
-							{isLoading ? "Saving..." : "Save Changes"}
+							type='button'
+							variant='outline'
+							onClick={() => {
+								form.reset({
+									username: "",
+									bio: "",
+									email: user?.email,
+									image: undefined,
+								});
+								setPreviewImage(null);
+								if (imageRef.current) {
+									imageRef.current.value = "";
+								}
+							}}>
+							Reset
 						</Button>
 					</div>
+					<Button
+						type='submit'
+						className='w-full'
+						disabled={isLoading}>
+						{isLoading ? "Saving..." : "Save Changes"}
+					</Button>
 				</form>
 			</Form>
 		</DialogContent>

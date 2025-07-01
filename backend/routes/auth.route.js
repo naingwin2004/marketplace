@@ -15,8 +15,11 @@ import {
 	refreshToken,
 	forgotPassword,
 	resetPassword,
-	changePassword
+	changePassword,
+	updatedProfile,
 } from "../controllers/authService.js";
+
+import { avatarUploadMiddleware } from "../middleware/multer.js";
 
 const authRouter = express.Router();
 
@@ -29,6 +32,13 @@ authRouter.post("/resetPassword/:token", resetPassword);
 authRouter.post("/verifyEmail", authMiddleware, verifyEmail);
 authRouter.post("/resendOtp", authMiddleware, resendOtp);
 authRouter.post("/changePassword", authMiddleware, changePassword);
+
+authRouter.patch(
+	"/updatedProfile",
+	authMiddleware,
+	avatarUploadMiddleware,
+	updatedProfile,
+);
 
 authRouter.get("/checkAuth", authMiddleware, checkAuth);
 

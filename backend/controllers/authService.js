@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto"; // from node
+import cloudinary from "../middleware/cloudinary.js";
 
 import User from "../models/user.js";
 import { generateAccessToken } from "../utils/jwt.js";
@@ -278,6 +279,49 @@ export const changePassword = async (req, res) => {
 		});
 	} catch (error) {
 		console.error("Change password error:", error.message);
+		return res.status(500).json({ message: "Server error" });
+	}
+};
+
+export const updatedProfile = async (req, res) => {
+	const { username, bio } = req.body;
+	const avatar = req.file ? req.file.path : null;
+
+	try {
+		const user = req.user;
+
+		if (username !== undefined) user.username = username;
+		if (bio !== undefined) user.bio = bio;
+
+		// Handle avatar upload
+		if (avatar) {
+			// Delete old avatar file if it exists
+			if (user.avatar && user.avatar.public_id) {
+				await cloudinary.uploader.destroy(user.avatar.public_id);
+			}
+			const uploadResponse = await cloudinary.uploader.upload(avatar, {
+				folder: "user_avatars", // automatic create folder and upload image this.folder
+				public_id: `avatar_${user._id}`, // created public_id
+			});
+			user.avatar = {
+				url: uploadResponse.secure_url,
+				public_id: uploadResponse.public_id,
+			};
+		}
+
+		await user.save();
+
+		return res.status(200).json({
+			message: "Profile updated successfully",
+			user: {
+				...user._doc,
+				password: undefined,
+				__v: undefined,
+				updatedAt: undefined,
+			},
+		});
+	} catch (error) {
+		console.error("UpdatedProfile error:", error.message);
 		return res.status(500).json({ message: "Server error" });
 	}
 };
