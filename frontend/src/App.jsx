@@ -10,6 +10,8 @@ import OTPVerification from "./pages/auth/OTPVerification.jsx";
 import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
 
+import ProductDetails from "./pages/products/ProductDetails";
+
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
 import AuthProvider from "./provider/AuthProvider";
@@ -82,6 +84,14 @@ const App = () => {
 						<AuthProvider>
 							<Profile />
 						</AuthProvider>
+					),
+				},
+				{
+					path: "/product/:id",
+					element: (
+						<>
+							<ProductDetails />
+						</>
 					),
 				},
 			],

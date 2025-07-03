@@ -9,7 +9,7 @@ export const authApi = createApi({
 	endpoints: (builder) => ({
 		login: builder.mutation({
 			query: (payload) => ({
-				url: "/login",
+				url: "auth/login",
 				method: "POST",
 				body: payload,
 			}),
@@ -17,7 +17,7 @@ export const authApi = createApi({
 
 		register: builder.mutation({
 			query: (payload) => ({
-				url: "/register",
+				url: "auth/register",
 				method: "POST",
 				body: payload,
 			}),
@@ -25,14 +25,14 @@ export const authApi = createApi({
 
 		logout: builder.mutation({
 			query: () => ({
-				url: "/logout",
+				url: "auth/logout",
 				method: "POST",
 			}),
 		}),
 
 		verifyEmail: builder.mutation({
 			query: (data) => ({
-				url: "/verifyEmail",
+				url: "auth/verifyEmail",
 				method: "POST",
 				body: data,
 			}),
@@ -40,7 +40,7 @@ export const authApi = createApi({
 
 		resendOtp: builder.mutation({
 			query: (email) => ({
-				url: "/resendOtp",
+				url: "auth/resendOtp",
 				method: "POST",
 				body: email,
 			}),
@@ -48,7 +48,7 @@ export const authApi = createApi({
 
 		forgotPassword: builder.mutation({
 			query: (email) => ({
-				url: "/forgotPassword",
+				url: "auth/forgotPassword",
 				method: "POST",
 				body: email,
 			}),
@@ -56,7 +56,7 @@ export const authApi = createApi({
 
 		resetPassword: builder.mutation({
 			query: ({ token, values }) => ({
-				url: `/resetPassword/${token}`,
+				url: `auth/resetPassword/${token}`,
 				method: "POST",
 				body: values,
 			}),
@@ -64,7 +64,7 @@ export const authApi = createApi({
 
 		changePassword: builder.mutation({
 			query: (payload) => ({
-				url: "/changePassword",
+				url: "auth/changePassword",
 				method: "POST",
 				body: payload,
 			}),
@@ -72,14 +72,14 @@ export const authApi = createApi({
 
 		updatedProfile: builder.mutation({
 			query: (formData) => ({
-				url: "/updatedProfile",
+				url: "auth/updatedProfile",
 				method: "PATCH",
 				body: formData,
 			}),
 		}),
 
 		checkAuth: builder.query({
-			query: () => "/checkAuth",
+			query: () => "auth/checkAuth",
 		}),
 	}),
 });

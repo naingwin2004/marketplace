@@ -3,7 +3,7 @@ import { setCredentials,logout } from "../app/features/auth.js";
 
 export const baseQueryWithReauth = async (args, api, extraOptions) => {
 	const baseQuery = fetchBaseQuery({
-		baseUrl: `${import.meta.env.VITE_SERVER_URL}/auth`,
+		baseUrl: `${import.meta.env.VITE_SERVER_URL}`,
 		credentials: "include",
 		prepareHeaders: (headers, { getState }) => {
 			const token = getState().auth.token;
@@ -22,7 +22,7 @@ export const baseQueryWithReauth = async (args, api, extraOptions) => {
 		result?.error?.data?.message === "TokenExpired"
 	) {
 		const refreshResult = await baseQuery(
-			{ url: "/refreshToken", method: "POST" },
+			{ url: "auth/refreshToken", method: "POST" },
 			api,
 			extraOptions,
 		);
