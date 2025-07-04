@@ -1,8 +1,8 @@
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
 	Select,
 	SelectContent,
@@ -20,34 +20,44 @@ import {
 	PaginationPrevious,
 } from "@/components/ui/pagination";
 
-import ProductCard from "../pages/ProductCard.jsx";
+import ProductCard from "../pages/products/ProductCard";
 
 import { usePublicProductsQuery } from "../services/products.js";
 
+const categoryData = [
+	{ value: "", name: "All Products" },
+	{ value: "electronics", name: "Electronics and Gadgets" },
+	{ value: "clothing", name: "Clothing and Fashion" },
+	{ value: "home", name: "Home & Kitchen" },
+	{ value: "sports", name: "Sports & Outdoors" },
+	{ value: "toys", name: "Toys and Games" },
+	{ value: "beauty", name: "Beauty and Personal Care" },
+	{ value: "books", name: "Books ans Media" },
+];
+
 const Home = () => {
 	const [selectedCategory, setSelectedCategory] = useState("");
-	const [searchThem, setSearchThem] = useState("");
+	const [searchQuery, setSearchQuery] = useState("");
+	const [waitSearchQuery, setWaitSearchQuery] = useState("");
 	const [page, setPage] = useState(1);
 	const [sortby, setSortChange] = useState("newest");
 
-	const { data, isLoading, error, isError } = usePublicProductsQuery();
+	const { data, isLoading, error, isError, isFetching } =
+		usePublicProductsQuery({
+			page,
+			waitSearchQuery,
+			sortby,
+			selectedCategory,
+		});
 
-	let url = "http://localhost:300/products";
-	const params = new URLSearchParams();
+	useEffect(() => {
+		const time = setTimeout(() => {
+			setWaitSearchQuery(searchQuery);
+		}, 250);
+		return () => clearTimeout(time);
+	}, [searchQuery]);
 
-	if (searchThem) {
-		params.append("search", searchThem);
-	}
-	if (sortby) {
-		params.append("sort", sortby);
-	}
-	if (selectedCategory) {
-		params.append("category", selectedCategory);
-	}
-
-	if ([...params].length > 0) {
-		url += `?${params.toString()}`;
-	}
+	console.log(isFetching);
 
 	if (error?.error) {
 		return (
@@ -71,20 +81,8 @@ const Home = () => {
 		);
 	}
 
-	console.log(page);
-
-	const categoryData = [
-		{ value: "", name: "All Products" },
-		{ value: "electronics", name: "Electronics and Gadgets" },
-		{ value: "clothing", name: "Clothing and Fashion" },
-		{ value: "home", name: "Home & Kitchen" },
-		{ value: "sports", name: "Sports & Outdoors" },
-		{ value: "toys", name: "Toys and Games" },
-		{ value: "beauty", name: "Beauty and Personal Care" },
-		{ value: "books", name: "Books ans Media" },
-	];
 	return (
-		<div className='h-full flex flex-col space-y-8 items-center'>
+		<div className='h-full flex flex-col space-y-6 items-center'>
 			<div className='flex flex-col items-center'>
 				<p className='text-lg font-medium'>ECSB</p>
 				<p className='text-sm text-muted-foreground'>
@@ -93,17 +91,24 @@ const Home = () => {
 			</div>
 
 			{/* Search */}
-			<div className='w-full flex justify-center items-center'>
+			<div className='w-full flex justify-center items-center gap-4'>
 				<div className='relative w-full max-w-md'>
 					<Search className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none' />
 					<Input
 						type='text'
 						placeholder='Search products...'
 						className='pl-10'
-						value={searchThem}
-						onChange={(e) => setSearchThem(e.target.value)}
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
 					/>
 				</div>
+				<Button
+					variant='outline'
+					size='icon'
+					disabled={searchQuery ? false : true}
+					onClick={() => setSearchQuery("")}>
+					<X size={18} />
+				</Button>
 			</div>
 
 			{/* Category Filter */}
@@ -133,7 +138,7 @@ const Home = () => {
 			<Select
 				value={sortby}
 				onValueChange={setSortChange}>
-				<SelectTrigger className='w-full lg:w-48'>
+				<SelectTrigger className='w-48'>
 					<SelectValue placeholder='Sort by' />
 				</SelectTrigger>
 				<SelectContent>
@@ -148,17 +153,25 @@ const Home = () => {
 				</SelectContent>
 			</Select>
 
-			<div className='grid md:grid-cols-3 gap-4 p-4'>
-				{data?.products.map((product) => (
-					<ProductCard
-						key={product._id}
-						product={product}
-					/>
-				))}
+			{data?.products.length == 0 && (
+				<div className='flex justify-center items-center'>
+					<p>No products Found...</p>
+				</div>
+			)}
+
+			<div className='grid grid-cols-1 md:grid-cols-3 gap-4 w-full p-4'>
+				{isFetching && <p>Fetching</p>}
+				{!isFetching &&
+					data?.products.map((product) => (
+						<ProductCard
+							key={product._id}
+							product={product}
+						/>
+					))}
 			</div>
 
 			{data?.totalPages > 1 && (
-				<Pagination>
+				<Pagination className={isFetching && "pointer-events-none"}>
 					<PaginationContent>
 						{/* Previous Button */}
 						<PaginationItem>
@@ -202,9 +215,11 @@ const Home = () => {
 			)}
 
 			{/* Footer */}
-			<footer className='text-center text-muted-foreground text-sm py-4'>
-				Page {page} of {data?.totalPages}
-			</footer>
+			{data?.totalPages > 0 && (
+				<footer className='text-center text-muted-foreground text-sm py-4'>
+					Page {data?.currentPage} of {data?.totalPages}
+				</footer>
+			)}
 		</div>
 	);
 };

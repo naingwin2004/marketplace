@@ -59,15 +59,17 @@ export default function ProductCard({ product }) {
 					</div>
 				</CardContent>
 
-				<CardFooter className='p-4 pt-0'>
+				<CardFooter className='p-4 pt-0 flex justify-between'>
 					<Link to={`product/${product._id}`}>
 						<Button
-							variant='ghost'
+							variant='outline'
 							className='w-full group'>
 							See More
 							<ArrowRight className='h-4 w-4 group-hover:translate-x-1 transition-transform' />
 						</Button>
 					</Link>
+
+					<span>{product.createdAt.split("T")[0]}</span>
 				</CardFooter>
 			</Card>
 		</div>

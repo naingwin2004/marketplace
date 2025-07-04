@@ -8,9 +8,19 @@ export const productsApi = createApi({
 
 	endpoints: (builder) => ({
 		publicProducts: builder.query({
-			query: () => ({
-				url: "/products",
-			}),
+			query: ({ page, waitSearchQuery, sortby, selectedCategory }) => {
+				const params = new URLSearchParams();
+				if (page) params.append("page", page);
+				if (waitSearchQuery) params.append("search", waitSearchQuery);
+				if (sortby) params.append("sortby", sortby);
+				if (selectedCategory)
+					params.append("category", selectedCategory);
+
+				return {
+					url: `/products?${params.toString()}`,
+					method: "GET",
+				};
+			},
 		}),
 	}),
 });

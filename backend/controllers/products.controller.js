@@ -2,37 +2,53 @@ import Product from "../models/products.js";
 
 export const publicProducts = async (req, res) => {
 	try {
-		const { page = 1 } = req.query;
+		const { page = 1, search, sortby = "newest", category } = req.query;
+
 		let filter = {
 			status: "active",
 		};
 
-		let sort = { createdAt: -1 };
+		if (category) {
+			filter.category = category;
+		}
+
+		if (search) {
+			filter.$or = [
+				{ name: { $regex: search, $options: "i" } },
+				{ description: { $regex: search, $options: "i" } },
+			];
+		}
+
+		let sort;
+		if (sortby === "newest") sort = { createdAt: -1 };
+		if (sortby === "oldest") sort = { createdAt: 1 };
+		if (sortby === "price-low") sort = { price: 1 };
+		if (sortby === "price-high") sort = { price: -1 };
+
 		let limit = 9;
 
 		const totalProducts = await Product.countDocuments(filter);
 		const totalPages = Math.ceil(totalProducts / limit);
 
-		const validPage = Math.min(page, totalPages);
+		const validPage = Math.max(1, Math.min(page, totalPages));
 
 		const products = await Product.find(filter)
-			.sort({ createdAt: -1 })
+			.sort(sort)
 			.skip((validPage - 1) * limit)
 			.limit(limit);
-			
-			const selectedProducts = products.map((product) => ({
-  _id: product._id,
-  name: product.name,
-  description: product.description,
-  category: product.category,
-  price: product.price,
-  coverImage: product.coverImage,
-}));
 
-
+		const selectedProducts = products.map((product) => ({
+			_id: product._id,
+			name: product.name,
+			description: product.description,
+			category: product.category,
+			price: product.price,
+			coverImage: product.coverImage,
+			createdAt:product.createdAt
+		}));
 
 		return res.status(200).json({
-			products:selectedProducts,
+			products: selectedProducts,
 			totalProducts,
 			currentPage: validPage,
 			totalPages,
