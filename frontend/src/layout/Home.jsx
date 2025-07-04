@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { useState } from "react";
-import { useCheckAuthQuery } from "../services/auth.js";
 import {
 	Select,
 	SelectContent,
@@ -23,11 +22,15 @@ import {
 
 import ProductCard from "../pages/ProductCard.jsx";
 
+import { usePublicProductsQuery } from "../services/products.js";
+
 const Home = () => {
 	const [selectedCategory, setSelectedCategory] = useState("");
 	const [searchThem, setSearchThem] = useState("");
+	const [page, setPage] = useState(1);
 	const [sortby, setSortChange] = useState("newest");
-	const { data, error, isError } = useCheckAuthQuery();
+
+	const { data, isLoading, error, isError } = usePublicProductsQuery();
 
 	let url = "http://localhost:300/products";
 	const params = new URLSearchParams();
@@ -46,8 +49,6 @@ const Home = () => {
 		url += `?${params.toString()}`;
 	}
 
-	console.log(url);
-
 	if (error?.error) {
 		return (
 			<div className='h-full flex justify-center items-center'>
@@ -62,6 +63,15 @@ const Home = () => {
 			</div>
 		);
 	}
+	if (isLoading) {
+		return (
+			<div className='h-full flex justify-center items-center'>
+				<p>Getting products...</p>
+			</div>
+		);
+	}
+
+	console.log(page);
 
 	const categoryData = [
 		{ value: "", name: "All Products" },
@@ -139,39 +149,62 @@ const Home = () => {
 			</Select>
 
 			<div className='grid md:grid-cols-3 gap-4 p-4'>
-				<ProductCard />
-				<ProductCard />
-				<ProductCard />
-				<ProductCard />
-				<ProductCard />
+				{data?.products.map((product) => (
+					<ProductCard
+						key={product._id}
+						product={product}
+					/>
+				))}
 			</div>
 
-			<Pagination>
-				<PaginationContent>
-					<PaginationItem>
-						<PaginationPrevious href='#' />
-					</PaginationItem>
-					<PaginationItem>
-						<PaginationLink href='#'>1</PaginationLink>
-					</PaginationItem>
-					<PaginationItem>
-						<PaginationLink
-							href='#'
-							isActive>
-							2
-						</PaginationLink>
-					</PaginationItem>
-					<PaginationItem>
-						<PaginationLink href='#'>3</PaginationLink>
-					</PaginationItem>
-					<PaginationItem>
-						<PaginationEllipsis />
-					</PaginationItem>
-					<PaginationItem>
-						<PaginationNext href='#' />
-					</PaginationItem>
-				</PaginationContent>
-			</Pagination>
+			{data?.totalPages > 1 && (
+				<Pagination>
+					<PaginationContent>
+						{/* Previous Button */}
+						<PaginationItem>
+							<button
+								disabled={page <= 1}
+								className='disabled:pointer-events-none disabled:opacity-50'>
+								<PaginationPrevious
+									onClick={() => setPage(page - 1)}
+								/>
+							</button>
+						</PaginationItem>
+
+						{/* Dynamic page numbers */}
+						{Array.from({ length: 3 }, (_, i) => {
+							const pageNumber = page - 1 + i;
+							if (pageNumber < 1 || pageNumber > data.totalPages)
+								return null;
+							return (
+								<PaginationItem key={pageNumber}>
+									<PaginationLink
+										isActive={pageNumber === page}
+										onClick={() => setPage(pageNumber)}>
+										{pageNumber}
+									</PaginationLink>
+								</PaginationItem>
+							);
+						})}
+
+						{/* Next Button */}
+						<PaginationItem>
+							<button
+								disabled={page >= data.totalPages}
+								className='disabled:pointer-events-none disabled:opacity-50'>
+								<PaginationNext
+									onClick={() => setPage(page + 1)}
+								/>
+							</button>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
+			)}
+
+			{/* Footer */}
+			<footer className='text-center text-muted-foreground text-sm py-4'>
+				Page {page} of {data?.totalPages}
+			</footer>
 		</div>
 	);
 };

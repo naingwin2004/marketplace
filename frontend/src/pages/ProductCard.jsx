@@ -9,20 +9,35 @@ import {
 	CardFooter,
 } from "@/components/ui/card";
 
-export default function ProductCard() {
+function formatMMK(amount) {
+	if (amount >= 100000) {
+		return (amount / 100000).toFixed(1).replace(".0", "") + "Lakh";
+	}
+	return amount;
+}
+
+export default function ProductCard({ product }) {
 	return (
 		<div>
 			<Card className='overflow-hidden hover:shadow-lg transition-shadow duration-300'>
-				<img
-					src='https://github.com/naingwin2004.png'
-					alt='Product Image'
-					className='w-full h-48 object-cover rounded-t-lg overflow-hidden'
-				/>
+				{product?.coverImage ? (
+					<img
+						src={product?.coverImage.url}
+						alt='Product Image'
+						className='w-full h-48 object-cover rounded-t-lg overflow-hidden bg-accent'
+					/>
+				) : (
+					<div className='w-full h-48 object-cover rounded-t-lg overflow-hidden bg-accent flex justify-center items-center'>
+						<span className='text-accent-foreground font-black text-2xl'>
+							ECSB
+						</span>
+					</div>
+				)}
 
 				<CardContent className='p-4'>
 					<div className='flex items-start justify-between mb-2'>
 						<h3 className='text-lg font-semibold  line-clamp-2 flex-1'>
-							Premium Wireless Headphones
+							{product.name}
 						</h3>
 						<Button
 							variant='ghost'
@@ -33,23 +48,22 @@ export default function ProductCard() {
 					</div>
 
 					<p className='text-muted-foreground text-sm line-clamp-3 mb-4'>
-						Experience crystal-clear audio with our premium wireless
-						headphones. Features noise cancellation, 30-hour battery
-						life, and comfortable design perfect for all-day
-						listening.
+						{product.description}
 					</p>
 
 					<div className='flex items-center justify-between'>
-						<span className='text-2xl font-bold text-muted-foreground'>
-							$199.99
+						<span className='text-xl font-bold text-muted-foreground'>
+							{formatMMK(product.price)}
 						</span>
-						<Badge variant='secondary'>electronics</Badge>
+						<Badge variant='secondary'>{product.category}</Badge>
 					</div>
 				</CardContent>
 
 				<CardFooter className='p-4 pt-0'>
-					<Link to='product/123'>
-						<Button className='w-full group'>
+					<Link to={`product/${product._id}`}>
+						<Button
+							variant='ghost'
+							className='w-full group'>
 							See More
 							<ArrowRight className='h-4 w-4 group-hover:translate-x-1 transition-transform' />
 						</Button>
