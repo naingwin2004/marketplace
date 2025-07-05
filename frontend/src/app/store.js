@@ -16,6 +16,7 @@ import { combineReducers } from "redux";
 
 import authReducer from "./features/auth.js";
 import { authApi } from "../services/auth.js";
+import { productsApi } from "../services/products.js";
 
 // persist config
 const persistConfig = {
@@ -28,6 +29,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
 	auth: authReducer,
 	[authApi.reducerPath]: authApi.reducer, // RTK Query API
+[productsApi.reducerPath]:productsApi.reducer
 });
 
 // Create persisted reducer
@@ -40,7 +42,6 @@ export const store = configureStore({
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({
 			serializableCheck: {
-
 				ignoredActions: [
 					FLUSH,
 					REHYDRATE,
@@ -50,7 +51,7 @@ export const store = configureStore({
 					REGISTER,
 				],
 			},
-		}).concat(authApi.middleware),
+		}).concat(authApi.middleware).concat(productsApi.middleware),
 });
 
 // Setup listeners for RTK Query

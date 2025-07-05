@@ -26,15 +26,11 @@ const App = () => {
 		{
 			path: "/",
 			element: <Layout />,
-			errorElement: <NotFoundPage />,
+			/*	errorElement: <NotFoundPage />,*/
 			children: [
 				{
 					index: true,
-					element: (
-						<AuthProvider>
-							<Home />
-						</AuthProvider>
-					),
+					element: <Home />,
 				},
 				{
 					path: "/login",
