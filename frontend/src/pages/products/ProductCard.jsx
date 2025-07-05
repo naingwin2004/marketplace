@@ -34,8 +34,8 @@ export default function ProductCard({ product }) {
 					</div>
 				)}
 
-				<CardContent className='p-4'>
-					<div className='flex items-start justify-between mb-2'>
+				<CardContent className='p-4 space-y-2'>
+					<div className='flex items-start justify-between'>
 						<h3 className='text-lg font-semibold  line-clamp-2 flex-1'>
 							{product.name}
 						</h3>
@@ -47,7 +47,7 @@ export default function ProductCard({ product }) {
 						</Button>
 					</div>
 
-					<p className='text-muted-foreground text-sm line-clamp-3 mb-4'>
+					<p className='text-muted-foreground text-sm line-clamp-3'>
 						{product.description}
 					</p>
 
