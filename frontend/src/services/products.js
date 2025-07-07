@@ -22,7 +22,11 @@ export const productsApi = createApi({
 				};
 			},
 		}),
+
+		productDetails: builder.query({
+			query: (id) => `/products/${id}`,
+		}),
 	}),
 });
 
-export const { usePublicProductsQuery } = productsApi;
+export const { usePublicProductsQuery, useProductDetailsQuery } = productsApi;

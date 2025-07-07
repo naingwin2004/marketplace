@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Heart, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
 import {
 	Card,
 	CardHeader,
@@ -55,7 +56,9 @@ export default function ProductCard({ product }) {
 						<span className='text-xl font-bold text-muted-foreground'>
 							{formatMMK(product.price)}
 						</span>
-						<Badge variant='secondary'>{product.category}</Badge>
+						<Badge variant='secondary'
+						className="capitalize"
+						>{product.category}</Badge>
 					</div>
 				</CardContent>
 
