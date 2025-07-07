@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 import Product from "../models/products.js";
 
 export const publicProducts = async (req, res) => {
@@ -44,7 +46,7 @@ export const publicProducts = async (req, res) => {
 			category: product.category,
 			price: product.price,
 			coverImage: product.coverImage,
-			createdAt:product.createdAt
+			createdAt: product.createdAt,
 		}));
 
 		return res.status(200).json({
@@ -55,6 +57,30 @@ export const publicProducts = async (req, res) => {
 		});
 	} catch (err) {
 		console.log("Error in publicProducts :", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const productDetails = async (req, res) => {
+	const { id } = req.params;
+	try {
+		if (!mongoose.Types.ObjectId.isValid(id)) {
+			return res.status(400).json({
+				message: " Invalid product ID",
+			});
+		}
+		const product = await Product.findById(id).populate(
+			"seller",
+			"_id username avatar email role bio",
+		);
+
+		if (!product) {
+			return res.status(404).json({ message: "Product Not Found" });
+		}
+
+		return res.status(200).json(product);
+	} catch (err) {
+		console.log("Error in productDetails :", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };
