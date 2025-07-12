@@ -17,7 +17,7 @@ export const productsApi = createApi({
 					params.append("category", selectedCategory);
 
 				return {
-					url: `/products?${params.toString()}`,
+					url: `/products/publicProducts?${params.toString()}`,
 					method: "GET",
 				};
 			},
@@ -26,7 +26,35 @@ export const productsApi = createApi({
 		productDetails: builder.query({
 			query: (id) => `/products/${id}`,
 		}),
+
+		products: builder.query({
+			query: ({ waitSearch, page = 1, status, category }) => {
+				const params = new URLSearchParams();
+				if (page) params.append("page", page);
+				if (status) params.append("status", status);
+				if (category) params.append("category", category);
+				if (waitSearch) params.append("search", waitSearch);
+				return {
+					url: `/products?${params.toString()}`,
+					method: "GET",
+				};
+			},
+		}),
+
+		addProduct: builder.mutation({
+			query: (data) => ({
+				url: "/products/add",
+				method: "POST",
+				body: data,
+			}),
+		}),
 	}),
 });
 
-export const { usePublicProductsQuery, useProductDetailsQuery } = productsApi;
+export const {
+	usePublicProductsQuery,
+	useProductDetailsQuery,
+	useProductsQuery,
+
+	useAddProductMutation,
+} = productsApi;

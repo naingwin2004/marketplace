@@ -18,6 +18,6 @@ app.use(
 );
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/products",productsRouter)
+app.use("/api/v1/products", productsRouter);
 
 export default app;

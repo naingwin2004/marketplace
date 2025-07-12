@@ -11,6 +11,8 @@ import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
 import ResetPassword from "./pages/auth/ResetPassword.jsx";
 
 import ProductDetails from "./pages/products/ProductDetails";
+import AddProducts from "./pages/products/AddProducts";
+import ManageProducts from "./pages/products/ManageProducts";
 
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
@@ -88,6 +90,22 @@ const App = () => {
 						<>
 							<ProductDetails />
 						</>
+					),
+				},
+				{
+					path: "/add-product",
+					element: (
+						<AuthProvider>
+							<AddProducts />
+						</AuthProvider>
+					),
+				},
+				{
+					path: "/products",
+					element: (
+						<AuthProvider>
+							<ManageProducts />
+						</AuthProvider>
 					),
 				},
 			],

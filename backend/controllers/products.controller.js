@@ -63,6 +63,7 @@ export const publicProducts = async (req, res) => {
 
 export const productDetails = async (req, res) => {
 	const { id } = req.params;
+
 	try {
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			return res.status(400).json({
@@ -81,6 +82,73 @@ export const productDetails = async (req, res) => {
 		return res.status(200).json(product);
 	} catch (err) {
 		console.log("Error in productDetails :", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const addProduct = async (req, res) => {
+	const { name, description, category, price, warranty, voucher } = req.body;
+
+	try {
+		const product = await Product.create({
+			name,
+			description,
+			category,
+			price,
+			warranty,
+			voucher,
+			seller: req.userId,
+		});
+		await product.save();
+
+		return res.status(201).json({
+			message: "product created",
+		});
+	} catch (err) {
+		console.log("Error in addProduct :", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const getProducts = async (req, res) => {
+	const { search, page = 1, status, category } = req.query;
+	try {
+		let limit = 10;
+
+		let filter = {};
+		if(search){
+		  filter.name={$regex :search , $options:"i"}
+		}
+		if (status) {
+			filter.status = status;
+		}
+		if (category) {
+			filter.category = category;
+		}
+
+		const totalProducts = await Product.countDocuments({
+			seller: req.userId,
+			...filter,
+		});
+		const totalPages = Math.ceil(totalProducts / limit);
+		const validPage = Math.max(1, Math.min(page, totalPages));
+
+		const products = await Product.find({ seller: req.userId, ...filter })
+			.sort({ createdAt: -1 })
+			.skip((validPage - 1) * limit)
+			.limit(limit);
+		if (!products) {
+			return res.status(404).json({ message: "No products" });
+		}
+
+		return res.status(200).json({
+			products,
+			totalPages,
+			currentPage: validPage,
+			totalProducts,
+		});
+	} catch (err) {
+		console.log("Error in getProducts :", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };
