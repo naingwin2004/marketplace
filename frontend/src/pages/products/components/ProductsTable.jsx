@@ -1,4 +1,6 @@
-import { X, Check, Ellipsis } from "lucide-react";
+import { X, Check, Ellipsis, Trash } from "lucide-react";
+import { toast } from "sonner";
+import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,11 +24,44 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { formatMMK } from "@/lib/formatMMK";
+import { useDeleteProductMutation } from "@/services/products";
 
 export const ProductsTable = ({ data }) => {
+	const timeoutRef = useRef(null);
+	const [products, setProducts] = useState(data?.products || []);
+
+	const [deleteProductMutation, { isLoading }] = useDeleteProductMutation();
+
+	const handleDelete = (name, id) => {
+		toast(
+			`Deleting ${name} in 5 seconds...`,
+			{
+				duration: 5000,
+				action: {
+					label: "Undo",
+					onClick: () => {
+						clearTimeout(timeoutRef.current);
+					},
+				},
+				icon: <Trash size={16} />,
+			},
+		);
+
+		// Delay API call by 5s
+		timeoutRef.current = setTimeout(async () => {
+			const res = await deleteProductMutation(id).unwrap();
+			toast.success(res?.message || "deleted ");
+
+			const filterProducts = products.filter(
+				(product) => product._id !== id,
+			);
+			setProducts(filterProducts);
+		}, 5000);
+	};
+
 	return (
 		<>
-			{data?.products.length !== 0 && (
+			{products.length !== 0 && (
 				<Table>
 					<TableCaption>A list of your recent products</TableCaption>
 					<TableHeader>
@@ -40,7 +75,7 @@ export const ProductsTable = ({ data }) => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{data?.products?.map((product, index) => (
+						{products?.map((product, index) => (
 							<TableRow key={index}>
 								<TableCell className='font-medium min-w-[100px]'>
 									<span className='line-clamp-1 break-words'>
@@ -98,7 +133,13 @@ export const ProductsTable = ({ data }) => {
 												Update images
 											</DropdownMenuItem>
 											<DropdownMenuSeparator />
-											<DropdownMenuItem>
+											<DropdownMenuItem
+												onClick={() =>
+													handleDelete(
+														product.name,
+														product._id,
+													)
+												}>
 												<span className='text-destructive'>
 													Drop Products
 												</span>

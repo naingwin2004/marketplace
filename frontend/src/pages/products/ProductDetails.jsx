@@ -8,6 +8,9 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { formatMMK } from "@/lib/formatMMK";
+import { formatDate } from "@/lib/formatDate";
+
 import { useProductDetailsQuery } from "@/services/products.js";
 
 const ProductDetails = () => {
@@ -48,23 +51,6 @@ const ProductDetails = () => {
 	);
 
 	const hasImages = productImages.length > 0;
-
-	function formatMMK(amount) {
-		if (amount >= 100000) {
-			return (amount / 100000).toFixed(1).replace(".0", "") + "Lakh";
-		}
-		return amount;
-	}
-
-	function formatDate(dateString) {
-		const date = new Date(dateString);
-
-		return date.toLocaleDateString("en-US", {
-			year: "numeric",
-			month: "short",
-			day: "numeric",
-		});
-	}
 
 	return (
 		<div className='h-full flex flex-col space-y-6  max-w-6xl mx-3'>

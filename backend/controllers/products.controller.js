@@ -116,8 +116,8 @@ export const getProducts = async (req, res) => {
 		let limit = 10;
 
 		let filter = {};
-		if(search){
-		  filter.name={$regex :search , $options:"i"}
+		if (search) {
+			filter.name = { $regex: search, $options: "i" };
 		}
 		if (status) {
 			filter.status = status;
@@ -149,6 +149,28 @@ export const getProducts = async (req, res) => {
 		});
 	} catch (err) {
 		console.log("Error in getProducts :", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const deleteProduct = async (req, res) => {
+	const { id } = req.params;
+	try {
+		const product = await Product.findById(id);
+		if (!product) {
+			return res.status(404).json({ message: "Product not found" });
+		}
+		if (product.seller.toString() !== req.userId.toString()) {
+			return res
+				.status(400)
+				.json({ message: "This is not your product" });
+		}
+		await product.deleteOne();
+		return res
+			.status(200)
+			.json({ message: "Product deleted successfully" });
+	} catch (err) {
+		console.log("Error in deleteProduct :", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };
