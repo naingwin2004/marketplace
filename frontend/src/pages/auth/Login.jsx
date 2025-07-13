@@ -1,6 +1,6 @@
 import * as z from "zod";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";

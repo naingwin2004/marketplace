@@ -10,7 +10,6 @@ import { Separator } from "@/components/ui/separator";
 
 import { ModeToggle } from "../components/mobile-toggle";
 
-
 export default function Layout() {
 	const location = useLocation();
 

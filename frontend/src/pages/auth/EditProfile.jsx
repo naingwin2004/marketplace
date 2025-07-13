@@ -1,6 +1,6 @@
 import { Textarea } from "@/components/ui/textarea";
 import { useSelector } from "react-redux";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";

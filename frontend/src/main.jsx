@@ -5,7 +5,8 @@ import App from "./App.jsx";
 
 import { store, persistor } from "./app/store.js";
 import { Provider } from "react-redux";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "sonner";
+
 import { ThemeProvider } from "@/components/theme-provider";
 import { PersistGate } from "redux-persist/integration/react";
 
@@ -19,7 +20,11 @@ createRoot(document.getElementById("root")).render(
 					defaultTheme='light'
 					storageKey='ecsb-theme'>
 					<App />
-					<Toaster />
+					<Toaster
+						position='top-right'
+						
+						richColors
+					/>
 				</ThemeProvider>
 			</PersistGate>
 		</Provider>

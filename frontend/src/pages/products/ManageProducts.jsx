@@ -1,8 +1,16 @@
-import { useState, useEffect } from "react";
-import { Search, X, Check, Ellipsis } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
+import {
+	Search,
+	X,
+	Check,
+	Ellipsis,
+	CircleCheckIcon,
+	XIcon,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import {
 	Select,
 	SelectContent,
@@ -13,33 +21,10 @@ import {
 	SelectSeparator,
 	SelectValue,
 } from "@/components/ui/select";
-import {
-	Table,
-	TableBody,
-	TableCaption,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-	TableFooter,
-} from "@/components/ui/table";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-	Pagination,
-	PaginationContent,
-	PaginationEllipsis,
-	PaginationItem,
-	PaginationLink,
-	PaginationNext,
-	PaginationPrevious,
-} from "@/components/ui/pagination";
+
+import { useProductsQuery } from "@/services/products.js";
+import { ProductsTable } from "./components/ProductsTable";
+import { ProductPagination } from "./components/ProductPagination";
 
 const categoryData = [
 	"electronics",
@@ -52,165 +37,6 @@ const categoryData = [
 ];
 
 const statusData = ["active", "pending", "reject"];
-function formatMMK(amount) {
-	if (amount >= 100000) {
-		return (amount / 100000).toFixed(1).replace(".0", "") + "Lakh";
-	}
-	return amount + "Kyat";
-}
-
-export const ProductsTable = ({ data }) => {
-	return (
-		<>
-			{data?.products.length !== 0 && (
-				<Table>
-					<TableCaption>A list of your recent products</TableCaption>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Name</TableHead>
-							<TableHead>Category</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>Warranty</TableHead>
-							<TableHead>Voucher</TableHead>
-							<TableHead>Price</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{data?.products?.map((product, index) => (
-							<TableRow key={index}>
-								<TableCell className='font-medium min-w-[100px]'>
-									<span className='line-clamp-1 break-words'>
-										{product?.name}
-									</span>
-								</TableCell>
-								<TableCell>{product?.category}</TableCell>
-								<TableCell>
-									<Badge
-										variant={
-											product?.status === "pending"
-												? ""
-												: product?.status === "active"
-												? "secondary"
-												: "destructive"
-										}>
-										{product?.status}
-									</Badge>
-								</TableCell>
-								<TableCell>
-									{product?.warranty ? (
-										<Check className='text-[#4ebf6b]' />
-									) : (
-										<X className='text-destructive' />
-									)}
-								</TableCell>
-								<TableCell>
-									{product?.voucher ? (
-										<Check className='text-[#4ebf6b]' />
-									) : (
-										<X className='text-destructive' />
-									)}
-								</TableCell>
-								<TableCell>
-									{formatMMK(product?.price)}
-								</TableCell>
-								<TableCell>
-									<DropdownMenu>
-										<DropdownMenuTrigger asChild>
-											<Button
-												variant='ghost'
-												size='icon'>
-												<Ellipsis size={16} />
-											</Button>
-										</DropdownMenuTrigger>
-										<DropdownMenuContent>
-											<DropdownMenuLabel>
-												My Account
-											</DropdownMenuLabel>
-											<DropdownMenuSeparator />
-											<DropdownMenuItem>
-												Edit product
-											</DropdownMenuItem>
-											<DropdownMenuItem>
-												Update images
-											</DropdownMenuItem>
-											<DropdownMenuSeparator />
-											<DropdownMenuItem>
-												<span className='text-destructive'>
-													Drop Products
-												</span>
-											</DropdownMenuItem>
-										</DropdownMenuContent>
-									</DropdownMenu>
-								</TableCell>
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
-			)}
-		</>
-	);
-};
-const ProductPagination = ({ isFetching, data, page, setPage }) => {
-	return (
-		<>
-			{!isFetching &&
-				data?.totalPages > 1 &&
-				data?.products.length > 1 && (
-					<Pagination className={isFetching && "pointer-events-none"}>
-						<PaginationContent>
-							{/* Previous Button */}
-							<PaginationItem>
-								<button
-									disabled={page <= 1}
-									className='disabled:pointer-events-none disabled:opacity-50'>
-									<PaginationPrevious
-										onClick={() => {
-											setPage(page - 1);
-										}}
-									/>
-								</button>
-							</PaginationItem>
-
-							{/* Dynamic page numbers */}
-							{Array.from({ length: 3 }, (_, i) => {
-								const pageNumber = page - 1 + i;
-								if (
-									pageNumber < 1 ||
-									pageNumber > data.totalPages
-								)
-									return null;
-								return (
-									<PaginationItem key={pageNumber}>
-										<PaginationLink
-											isActive={pageNumber === page}
-											onClick={() => {
-												setPage(pageNumber);
-											}}>
-											{pageNumber}
-										</PaginationLink>
-									</PaginationItem>
-								);
-							})}
-
-							{/* Next Button */}
-							<PaginationItem>
-								<button
-									disabled={page >= data.totalPages}
-									className='disabled:pointer-events-none disabled:opacity-50'>
-									<PaginationNext
-										onClick={() => {
-											setPage(page + 1);
-										}}
-									/>
-								</button>
-							</PaginationItem>
-						</PaginationContent>
-					</Pagination>
-				)}
-		</>
-	);
-};
-import { useProductsQuery } from "@/services/products.js";
 
 const ManageProducts = () => {
 	const [search, setSearch] = useState("");
@@ -322,7 +148,7 @@ const ManageProducts = () => {
 				</div>
 			)}
 			{isFetching ? (
-				<p className="text-center">Getting Products...</p>
+				<p className='text-center'>Getting Products...</p>
 			) : (
 				<ProductsTable data={data} />
 			)}

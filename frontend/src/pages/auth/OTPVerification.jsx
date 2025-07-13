@@ -1,5 +1,5 @@
 import * as z from "zod";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
