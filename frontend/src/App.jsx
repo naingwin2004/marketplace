@@ -13,6 +13,7 @@ import ResetPassword from "./pages/auth/ResetPassword.jsx";
 import ProductDetails from "./pages/products/ProductDetails";
 import AddProducts from "./pages/products/AddProducts";
 import ManageProducts from "./pages/products/ManageProducts";
+import UpdateImages from "./pages/products/UpdateImages";
 
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
@@ -105,6 +106,14 @@ const App = () => {
 					element: (
 						<AuthProvider>
 							<ManageProducts />
+						</AuthProvider>
+					),
+				},
+				{
+					path: "/images/:id",
+					element: (
+						<AuthProvider>
+							<UpdateImages />
 						</AuthProvider>
 					),
 				},

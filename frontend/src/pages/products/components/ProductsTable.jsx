@@ -1,6 +1,7 @@
 import { X, Check, Ellipsis, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,19 +34,16 @@ export const ProductsTable = ({ data }) => {
 	const [deleteProductMutation, { isLoading }] = useDeleteProductMutation();
 
 	const handleDelete = (name, id) => {
-		toast(
-			`Deleting ${name} in 5 seconds...`,
-			{
-				duration: 5000,
-				action: {
-					label: "Undo",
-					onClick: () => {
-						clearTimeout(timeoutRef.current);
-					},
+		toast(`Deleting ${name} in 5 seconds...`, {
+			duration: 5000,
+			action: {
+				label: "Undo",
+				onClick: () => {
+					clearTimeout(timeoutRef.current);
 				},
-				icon: <Trash size={16} />,
 			},
-		);
+			icon: <Trash size={16} />,
+		});
 
 		// Delay API call by 5s
 		timeoutRef.current = setTimeout(async () => {
@@ -130,7 +128,9 @@ export const ProductsTable = ({ data }) => {
 												Edit product
 											</DropdownMenuItem>
 											<DropdownMenuItem>
-												Update images
+												<Link to='/images/123'>
+													Update images
+												</Link>
 											</DropdownMenuItem>
 											<DropdownMenuSeparator />
 											<DropdownMenuItem

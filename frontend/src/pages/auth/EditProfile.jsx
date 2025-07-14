@@ -36,6 +36,7 @@ const ACCEPTED_IMAGE_TYPES = [
 	"image/jpg",
 	"image/png",
 	"image/webp",
+	"image/svg+xml",
 ];
 
 const formatBytes = (bytes, decimals = 2) => {
@@ -134,7 +135,7 @@ const EditProfile = ({ setOpen }) => {
 			// File type validation
 			if (!ACCEPTED_IMAGE_TYPES.includes(file.type)) {
 				const error =
-					"Please upload a valid image file (JPEG, PNG, or WebP).";
+					"Please upload a valid image file (JPEG,SVG, PNG, or WebP).";
 				form.setError("avatar", { message: error });
 				return;
 			}
