@@ -303,9 +303,11 @@ export const updatedProfile = async (req, res) => {
 				folder: "user_avatars", // automatic create folder and upload image this.folder
 				public_id: `avatar_${user._id}`, // created public_id
 			});
+
 			user.avatar = {
 				url: uploadResponse.secure_url,
-				public_id: uploadResponse.public_id,
+				id: uploadResponse.public_id,
+				name: uploadResponse.display_name,
 			};
 		}
 

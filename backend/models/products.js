@@ -1,9 +1,10 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const imageSchema = new mongoose.Schema(
 	{
 		url: String,
-		public_id: String,
+		id: String,
+		name:String
 	},
 	{ _id: false },
 );
@@ -35,7 +36,7 @@ const productSchema = new mongoose.Schema(
 		},
 		status: {
 			type: String,
-			enum: ["pending", "active","reject"],
+			enum: ["pending", "active", "reject"],
 			default: "pending",
 		},
 		coverImage: imageSchema,

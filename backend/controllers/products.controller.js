@@ -156,6 +156,9 @@ export const getProducts = async (req, res) => {
 export const deleteProduct = async (req, res) => {
 	const { id } = req.params;
 	try {
+		if (!mongoose.Types.ObjectId.isValid(id)) {
+			return res.status(400).json({ message: "Invalid productIdb" });
+		}
 		const product = await Product.findById(id);
 		if (!product) {
 			return res.status(404).json({ message: "Product not found" });
