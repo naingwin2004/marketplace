@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-
+import { toast } from "sonner";
+import { useParams, useNavigate } from "react-router-dom";
 import {
 	AlertCircleIcon,
 	LoaderCircle,
@@ -11,20 +12,25 @@ import {
 import { useFileUpload } from "@/hooks/use-file-upload";
 import { Button } from "@/components/ui/button";
 
-export default function Images({ setFiles }) {
-	// Create some dummy initial files
-	const [initialFiles, setInitialFiles] = useState([
-		{
-			url: "https://github.com/naingwin2004.png",
-			id: "naing",
-			isFromServer: true,
-		},
-	]);
-	const [isLoading, setLoading] = useState(false);
+import { useDeleteImageMutation } from "@/services/products";
+
+export default function Images({ setFiles, data }) {
+	const [deleteImageMutation, { isLoading, error }] =
+		useDeleteImageMutation();
+
+	const { id: productId } = useParams();
+	const navigate = useNavigate();
 
 	const maxSizeMB = 5;
 	const maxSize = maxSizeMB * 1024 * 1024; // 5MB default
-	const maxFiles = 6;
+	const maxFiles = 4;
+
+	const initialFiles = data
+		? data.map((item) => ({
+				...item,
+				isFromServer: true,
+		  }))
+		: [];
 
 	const [
 		{ files, isDragging, errors },
@@ -45,11 +51,26 @@ export default function Images({ setFiles }) {
 		initialFiles,
 	});
 
-	const handleDelete = (file) => {
-		if (file.file.isFromServer) {
-			console.log("delete in server photo");
+	const handleDelete = async (file) => {
+		try {
+			if (file.file.isFromServer) {
+				const imageId = file.file.id;
+				const res = await deleteImageMutation({
+					productId,
+					imageId,
+				}).unwrap();
+
+				toast.success(res.message || "Success");
+			}
+
+			removeFile(file.id);
+		} catch (error) {
+			toast.error(
+				error?.data.message ||
+					"An error occurred while deleting the image.",
+			);
+			navigate("/products");
 		}
-		removeFile(file.id);
 	};
 
 	useEffect(() => {
@@ -58,7 +79,7 @@ export default function Images({ setFiles }) {
 
 	return (
 		<div className='flex flex-col gap-2'>
-			<p className='text-xl font-bold'>Images</p>
+			<p className='text-xl font-bold'>Images (optional)</p>
 			{/* Drop area */}
 			<div
 				onDragEnter={handleDragEnter}

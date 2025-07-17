@@ -2,25 +2,25 @@ import {
 	AlertCircleIcon,
 	ImageUpIcon,
 	XIcon,
-	LoaderCircle,
+	
 } from "lucide-react";
 import { useEffect, useState } from "react";
-
 import { useFileUpload } from "@/hooks/use-file-upload";
 
-export default function CoverImageUpload({ setCover }) {
+export default function CoverImageUpload({ setCover, data }) {
 	const maxSizeMB = 5;
 	const maxSize = maxSizeMB * 1024 * 1024; // 5MB default
 
-	const [isLoading, setLoading] = useState(false);
-
-	const initialFiles = [
-		{
-			url: "https://github.com/naingwin2004.png",
-			id: "naing",
-			isFromServer: true,
-		},
-	];
+	// Conditionally create initialFiles based on server data
+	const initialFiles = data
+		? [
+				{
+					id: data.id,
+					name: data.name,
+					url: data.url,
+				},
+		  ]
+		: [];
 
 	const [
 		{ files, isDragging, errors },
@@ -45,21 +45,14 @@ export default function CoverImageUpload({ setCover }) {
 		setCover(files);
 	}, [setCover, files]);
 
-	const handleDelete = (files) => {
-		if (files[0].file.isFromServer) {
-			console.log("server image delete");
-		}
-		removeFile(files[0]?.id);
-	};
-
 	return (
 		<div className='flex flex-col gap-2'>
-				<p className='text-xl font-bold'>Cover Image</p>
+			<p className='text-xl font-bold'>Cover Image</p>
 			<div className='relative'>
 				{/* Drop area */}
 				<div
 					role='button'
-					onClick={!isLoading && openFileDialog}
+					onClick={openFileDialog}
 					onDragEnter={handleDragEnter}
 					onDragLeave={handleDragLeave}
 					onDragOver={handleDragOver}
@@ -74,8 +67,12 @@ export default function CoverImageUpload({ setCover }) {
 					{previewUrl ? (
 						<div className='absolute inset-0'>
 							<img
-								src={previewUrl}
-								alt={files[0]?.file?.name || "Uploaded image"}
+								src={previewUrl || "/placeholder.svg"}
+								alt={
+									files[0]?.file?.name ||
+									files[0]?.name ||
+									"Uploaded image"
+								}
 								className='size-full object-cover'
 							/>
 						</div>
@@ -100,24 +97,16 @@ export default function CoverImageUpload({ setCover }) {
 						<button
 							type='button'
 							className='focus-visible:border-ring focus-visible:ring-ring/50 z-50 flex size-8 cursor-pointer items-center justify-center rounded-full bg-black/60 text-white transition-[color,box-shadow] outline-none hover:bg-black/80 focus-visible:ring-[3px]'
-							onClick={() => handleDelete(files)}
+							onClick={() => removeFile(files[0]?.id)}
 							aria-label='Remove image'>
-							{isLoading ? (
-								<LoaderCircle
-									className='size-4 animate-spin'
-									aria-hidden='true'
-								/>
-							) : (
-								<XIcon
-									className='size-4'
-									aria-hidden='true'
-								/>
-							)}
+							<XIcon
+								className='size-4'
+								aria-hidden='true'
+							/>
 						</button>
 					</div>
 				)}
 			</div>
-
 			{errors.length > 0 && (
 				<div
 					className='text-destructive flex items-center gap-1 text-xs'

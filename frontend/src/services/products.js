@@ -55,6 +55,34 @@ export const productsApi = createApi({
 				method: "DELETE",
 			}),
 		}),
+
+		deleteImage: builder.mutation({
+			query: ({ productId, imageId }) => {
+				const params = new URLSearchParams();
+				if (productId) {
+					params.append("productId", productId);
+				}
+				if (imageId) {
+					params.append("imageId", imageId);
+				}
+				return {
+					url: `/products/delete-image?${params.toString()}`,
+					method: "DELETE",
+				};
+			},
+		}),
+
+		updateImage: builder.mutation({
+			query: ({ id, formData }) => ({
+				url: `/products/${id}`,
+				method: "POST",
+				body: formData,
+			}),
+		}),
+
+		getImages: builder.query({
+			query: (id) => `/products/images/${id}`,
+		}),
 	}),
 });
 
@@ -62,7 +90,10 @@ export const {
 	usePublicProductsQuery,
 	useProductDetailsQuery,
 	useProductsQuery,
+	useGetImagesQuery,
 
 	useAddProductMutation,
+	useDeleteImageMutation,
 	useDeleteProductMutation,
+	useUpdateImageMutation,
 } = productsApi;

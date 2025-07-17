@@ -128,7 +128,8 @@ export const ProductsTable = ({ data }) => {
 												Edit product
 											</DropdownMenuItem>
 											<DropdownMenuItem>
-												<Link to='/images/123'>
+												<Link
+													to={`/images/${product._id}`}>
 													Update images
 												</Link>
 											</DropdownMenuItem>
