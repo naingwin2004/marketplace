@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { Heart, ArrowLeft, Check, X, Calendar } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -19,11 +21,13 @@ const ProductDetails = () => {
 	const [selectedImage, setSelectedImage] = useState(0);
 	const [isFavorite, setIsFavorite] = useState(false);
 
+	const user = useSelector(state => state.auth?.user?._id);
+
 	const { data, isLoading, error } = useProductDetailsQuery(id);
 
 	if (error?.error) {
 		return (
-			<div className='h-full flex justify-center items-center'>
+			<div className="h-full flex justify-center items-center">
 				<p>{error?.status} : Please Check Your Internet</p>
 			</div>
 		);
@@ -31,7 +35,7 @@ const ProductDetails = () => {
 
 	if (error?.data) {
 		return (
-			<div className='h-full flex justify-center items-center'>
+			<div className="h-full flex justify-center items-center">
 				<p>{error?.data?.message}</p>
 			</div>
 		);
@@ -39,7 +43,7 @@ const ProductDetails = () => {
 
 	if (isLoading) {
 		return (
-			<div className='h-full flex justify-center items-center'>
+			<div className="h-full flex justify-center items-center">
 				<p>Getting Products Details...</p>
 			</div>
 		);
@@ -47,40 +51,38 @@ const ProductDetails = () => {
 
 	// what filter(Boolean) work ? remove falsy value
 	const productImages = [data?.coverImage, ...data?.arrayImages].filter(
-		Boolean,
+		Boolean
 	);
 
 	const hasImages = productImages.length > 0;
 
 	return (
-		<div className='h-full flex flex-col space-y-6  max-w-6xl mx-3'>
-			<div className='self-end'>
+		<div className="h-full flex flex-col space-y-6  max-w-6xl mx-3">
+			<div className="self-end">
 				<Button
-					variant='ghost'
-					className='group'
+					variant="ghost"
+					className="group"
 					onClick={() => navigate(-1)}>
-					<ArrowLeft className='h-4 w-4 group-hover:-translate-x-1 transition-transform' />
+					<ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
 					Go back
 				</Button>
 			</div>
 
-			<div className='grid md:grid-cols-2 gap-8 max-w-2xl mx-auto'>
+			<div className="grid md:grid-cols-2 gap-8 max-w-2xl mx-auto">
 				{/* Image Section */}
-				<div className='space-y-4'>
+				<div className="space-y-4">
 					{/* Main Image Display */}
-					<AspectRatio
-						ratio={1}
-						className='w-full'>
+					<AspectRatio ratio={1} className="w-full">
 						{hasImages ? (
 							<img
 								src={productImages[selectedImage]?.url}
 								alt={data?.name}
-								className='w-full h-full rounded-lg object-cover border bg-accent '
+								className="w-full h-full rounded-lg object-cover border bg-accent "
 							/>
 						) : (
-							<div className='w-full h-full bg-accent rounded-lg border flex items-center justify-center'>
-								<div className='text-center text-muted-foreground'>
-									<div className='text-4xl mb-2'>📦</div>
+							<div className="w-full h-full bg-accent rounded-lg border flex items-center justify-center">
+								<div className="text-center text-muted-foreground">
+									<div className="text-4xl mb-2">📦</div>
 									<p>No Image Available</p>
 								</div>
 							</div>
@@ -89,7 +91,7 @@ const ProductDetails = () => {
 
 					{/* Image Thumbnails */}
 					{hasImages && productImages.length > 1 && (
-						<div className='grid grid-cols-4 gap-2'>
+						<div className="grid grid-cols-4 gap-2">
 							{productImages.map((image, index) => (
 								<div
 									key={index}
@@ -102,7 +104,7 @@ const ProductDetails = () => {
 									<img
 										src={image?.url}
 										alt={`Product view ${index + 1}`}
-										className='w-full h-full object-cover'
+										className="w-full h-full object-cover"
 									/>
 								</div>
 							))}
@@ -111,15 +113,15 @@ const ProductDetails = () => {
 				</div>
 
 				{/* Product Details Section */}
-				<div className='space-y-6'>
+				<div className="space-y-6">
 					{/* Header */}
-					<div className='space-y-4'>
-						<div className='flex items-start justify-between'>
-							<h1 className='text-3xl font-bold'>{data?.name}</h1>
+					<div className="space-y-4">
+						<div className="flex items-start justify-between">
+							<h1 className="text-3xl font-bold">{data?.name}</h1>
 
 							<Button
-								variant='ghost'
-								size='icon'
+								variant="ghost"
+								size="icon"
 								onClick={() => setIsFavorite(!isFavorite)}
 								className={`hover:bg-red-50 hover:text-red-500 ${
 									isFavorite ? "text-red-500" : ""
@@ -133,13 +135,11 @@ const ProductDetails = () => {
 						</div>
 
 						{/* Price */}
-						<div className='flex justify-between items-center'>
-							<p className='text-xl font-bold'>
+						<div className="flex justify-between items-center">
+							<p className="text-xl font-bold">
 								{formatMMK(data?.price)}
 							</p>
-							<Badge
-								variant='secondary'
-								className='capitalize'>
+							<Badge variant="secondary" className="capitalize">
 								{data?.category}
 							</Badge>
 						</div>
@@ -147,9 +147,9 @@ const ProductDetails = () => {
 
 					{/* Product created Date Card */}
 
-					<Card className='bg-accent'>
-						<CardContent className='p-4'>
-							<div className='flex justify-between items-center text-xs text-muted-foreground'>
+					<Card className="bg-accent">
+						<CardContent className="p-4">
+							<div className="flex justify-between items-center text-xs text-muted-foreground">
 								<span>
 									Listed on {formatDate(data?.createdAt)}
 								</span>
@@ -165,33 +165,33 @@ const ProductDetails = () => {
 					<Separator />
 
 					{/* Description */}
-					<div className='space-y-2'>
-						<h3 className='text-lg font-semibold'>Description</h3>
-						<p className='text-muted-foreground leading-relaxed'>
+					<div className="space-y-2">
+						<h3 className="text-lg font-semibold">Description</h3>
+						<p className="text-muted-foreground leading-relaxed">
 							{data?.description}
 						</p>
 
-						<div className='grid grid-cols-2 gap-4'>
-							<div className='flex items-center justify-between p-3 bg-accent rounded-lg'>
-								<span className='text-sm font-medium'>
+						<div className="grid grid-cols-2 gap-4">
+							<div className="flex items-center justify-between p-3 bg-accent rounded-lg">
+								<span className="text-sm font-medium">
 									Warranty
 								</span>
 
 								{data?.warranty ? (
-									<Check className='text-[#4ebf6b]' />
+									<Check className="text-[#4ebf6b]" />
 								) : (
-									<X className='text-destructive' />
+									<X className="text-destructive" />
 								)}
 							</div>
-							<div className='flex items-center justify-between p-3 bg-accent rounded-lg px-3'>
-								<span className='text-sm font-medium'>
+							<div className="flex items-center justify-between p-3 bg-accent rounded-lg px-3">
+								<span className="text-sm font-medium">
 									Voucher
 								</span>
 
 								{data?.voucher ? (
-									<Check className='text-[#4ebf6b]' />
+									<Check className="text-[#4ebf6b]" />
 								) : (
-									<X className='text-destructive' />
+									<X className="text-destructive" />
 								)}
 							</div>
 						</div>
@@ -200,37 +200,37 @@ const ProductDetails = () => {
 					<Separator />
 
 					{/* Seller Info */}
-					<div className='space-y-2'>
-						<h3 className='text-lg font-semibold'>
+					<div className="space-y-2">
+						<h3 className="text-lg font-semibold">
 							Seller Information
 						</h3>
 						<Card>
-							<CardContent className='p-4 space-y-4'>
-								<div className='flex items-center gap-4'>
-									<Avatar className='w-12 h-12'>
+							<CardContent className="p-4 space-y-4">
+								<div className="flex items-center gap-4">
+									<Avatar className="w-12 h-12">
 										<AvatarImage
 											src={data?.seller?.avatar?.url}
 										/>
-										<AvatarFallback className='text-md'>
+										<AvatarFallback className="text-md">
 											{data?.seller?.username
 												.split(" ")
-												.map((n) => n[0])
+												.map(n => n[0])
 												.join("")}
 										</AvatarFallback>
 									</Avatar>
-									<span className='text-md font-medium'>
+									<span className="text-md font-medium">
 										{data?.seller?.username}
 									</span>
 
-									<Badge className='ml-auto capitalize'>
+									<Badge className="ml-auto capitalize">
 										{data?.seller?.role}
 									</Badge>
 								</div>
-								<div className='flex flex-col space-y-2 text-sm text-muted-foreground'>
+								<div className="flex flex-col space-y-2 text-sm text-muted-foreground">
 									<p>Email : {data?.seller?.email}</p>
-									<p className='flex gap-1'>
-										<span className='shrink-0'>Bio : </span>
-										<span className='break-all'>
+									<p className="flex gap-1">
+										<span className="shrink-0">Bio : </span>
+										<span className="break-all">
 											{data?.seller?.bio}
 										</span>
 									</p>
@@ -240,16 +240,28 @@ const ProductDetails = () => {
 					</div>
 
 					{/* Action Buttons */}
-					<div className='space-y-3 pt-4'>
-						<Button
-							className='w-full'
-							size='lg'>
-							Button 1
-						</Button>
-						<Button
-							variant='outline'
-							className='w-full'
-							size='lg'>
+					<div className="space-y-3 pt-4">
+						{user === data?.seller._id && (
+							<div className="flex space-x-3">
+								<Button
+									className="w-full"
+									variant="outline"
+									size="lg">
+									<Link to={`/edit-product/${data?._id}`}>
+										Edit Product
+									</Link>
+								</Button>
+								<Button
+									className="w-full"
+									variant="outline"
+									size="lg">
+									<Link to={`/images/${data?._id}`}>
+										Update Images
+									</Link>
+								</Button>
+							</div>
+						)}
+						<Button className="w-full" size="lg">
 							Button 2
 						</Button>
 					</div>

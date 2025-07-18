@@ -1,12 +1,12 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-
 import { baseQueryWithReauth } from "./baseQueryWithReauth.js";
 
 export const productsApi = createApi({
 	reducerPath: "productsApi",
 	baseQuery: baseQueryWithReauth,
+	tagTypes: ["Products", "Product"],
 
-	endpoints: (builder) => ({
+	endpoints: builder => ({
 		publicProducts: builder.query({
 			query: ({ page, waitSearchQuery, sortby, selectedCategory }) => {
 				const params = new URLSearchParams();
@@ -18,13 +18,24 @@ export const productsApi = createApi({
 
 				return {
 					url: `/products/publicProducts?${params.toString()}`,
-					method: "GET",
+					method: "GET"
 				};
 			},
+			providesTags: result =>
+				result
+					? [
+							...result.products.map(({ _id }) => ({
+								type: "Product",
+								id: _id
+							})),
+							{ type: "Products", id: "LIST" }
+					  ]
+					: [{ type: "Products", id: "LIST" }]
 		}),
 
 		productDetails: builder.query({
-			query: (id) => `/products/${id}`,
+			query: id => `/products/${id}`,
+			providesTags: (result, error, id) => [{ type: "Product", id }]
 		}),
 
 		products: builder.query({
@@ -36,54 +47,88 @@ export const productsApi = createApi({
 				if (waitSearch) params.append("search", waitSearch);
 				return {
 					url: `/products?${params.toString()}`,
-					method: "GET",
+					method: "GET"
 				};
 			},
+			providesTags: result =>
+				result
+					? [
+							...result.products.map(({ _id }) => ({
+								type: "Product",
+								id: _id
+							})),
+							{ type: "Products", id: "LIST" }
+					  ]
+					: [{ type: "Products", id: "LIST" }]
 		}),
 
 		addProduct: builder.mutation({
-			query: (data) => ({
+			query: data => ({
 				url: "/products/add",
 				method: "POST",
-				body: data,
+				body: data
 			}),
+			invalidatesTags: [{ type: "Products", id: "LIST" }]
 		}),
 
 		deleteProduct: builder.mutation({
-			query: (id) => ({
+			query: id => ({
 				url: `/products/${id}`,
-				method: "DELETE",
+				method: "DELETE"
 			}),
+			invalidatesTags: (result, error, id) => [
+				{ type: "Product", id },
+				{ type: "Products", id: "LIST" }
+			]
 		}),
 
 		deleteImage: builder.mutation({
 			query: ({ productId, imageId }) => {
 				const params = new URLSearchParams();
-				if (productId) {
-					params.append("productId", productId);
-				}
-				if (imageId) {
-					params.append("imageId", imageId);
-				}
+				if (productId) params.append("productId", productId);
+				if (imageId) params.append("imageId", imageId);
 				return {
 					url: `/products/delete-image?${params.toString()}`,
-					method: "DELETE",
+					method: "DELETE"
 				};
 			},
+			invalidatesTags: (result, error, { productId }) => [
+				{ type: "Product", id: productId }
+			]
 		}),
 
 		updateImage: builder.mutation({
 			query: ({ id, formData }) => ({
 				url: `/products/${id}`,
 				method: "POST",
-				body: formData,
+				body: formData
 			}),
+			invalidatesTags: (result, error, { id }) => [
+				{ type: "Product", id }
+			]
+		}),
+		updateProduct: builder.mutation({
+			query: data => ({
+				url: `/products/update`,
+				method: "POST",
+				body: data
+			}),
+			invalidatesTags: (result, error, { id }) => [
+				{ type: "Product", id }
+			]
 		}),
 
+		// These endpoints don't need tags as they're only used for editing
 		getImages: builder.query({
-			query: (id) => `/products/images/${id}`,
+			query: id => `/products/images/${id}`,
+			providesTags: (result, error, id) => [{ type: "Product", id }]
 		}),
-	}),
+
+		getOldProduct: builder.query({
+			query: id => `/products/oldProduct/${id}`,
+			providesTags: (result, error, id) => [{ type: "Product", id }]
+		})
+	})
 });
 
 export const {
@@ -91,9 +136,11 @@ export const {
 	useProductDetailsQuery,
 	useProductsQuery,
 	useGetImagesQuery,
+	useGetOldProductQuery,
 
 	useAddProductMutation,
 	useDeleteImageMutation,
 	useDeleteProductMutation,
 	useUpdateImageMutation,
+	useUpdateProductMutation
 } = productsApi;

@@ -14,6 +14,7 @@ import ProductDetails from "./pages/products/ProductDetails";
 import AddProducts from "./pages/products/AddProducts";
 import ManageProducts from "./pages/products/ManageProducts";
 import UpdateImages from "./pages/products/UpdateImages";
+import EditProduct from "./pages/products/EditProduct";
 
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
@@ -21,7 +22,7 @@ import AuthProvider from "./provider/AuthProvider";
 
 import {
 	RedirectAuthenticatedUser,
-	ProtectedUnverifiedOnly,
+	ProtectedUnverifiedOnly
 } from "./provider/ProtectRoute.jsx";
 
 const App = () => {
@@ -33,7 +34,7 @@ const App = () => {
 			children: [
 				{
 					index: true,
-					element: <Home />,
+					element: <Home />
 				},
 				{
 					path: "/login",
@@ -41,7 +42,7 @@ const App = () => {
 						<RedirectAuthenticatedUser>
 							<Login />
 						</RedirectAuthenticatedUser>
-					),
+					)
 				},
 				{
 					path: "/register",
@@ -49,7 +50,7 @@ const App = () => {
 						<RedirectAuthenticatedUser>
 							<Register />
 						</RedirectAuthenticatedUser>
-					),
+					)
 				},
 				{
 					path: "/verifyEmail",
@@ -59,7 +60,7 @@ const App = () => {
 								<OTPVerification />
 							</ProtectedUnverifiedOnly>
 						</AuthProvider>
-					),
+					)
 				},
 				{
 					path: "/forgot-password",
@@ -67,7 +68,7 @@ const App = () => {
 						<>
 							<ForgotPassword />
 						</>
-					),
+					)
 				},
 				{
 					path: "/reset-password/:token",
@@ -75,7 +76,7 @@ const App = () => {
 						<>
 							<ResetPassword />
 						</>
-					),
+					)
 				},
 				{
 					path: "/profile",
@@ -83,7 +84,7 @@ const App = () => {
 						<AuthProvider>
 							<Profile />
 						</AuthProvider>
-					),
+					)
 				},
 				{
 					path: "/product/:id",
@@ -91,7 +92,7 @@ const App = () => {
 						<>
 							<ProductDetails />
 						</>
-					),
+					)
 				},
 				{
 					path: "/add-product",
@@ -99,7 +100,7 @@ const App = () => {
 						<AuthProvider>
 							<AddProducts />
 						</AuthProvider>
-					),
+					)
 				},
 				{
 					path: "/products",
@@ -107,7 +108,7 @@ const App = () => {
 						<AuthProvider>
 							<ManageProducts />
 						</AuthProvider>
-					),
+					)
 				},
 				{
 					path: "/images/:id",
@@ -115,11 +116,20 @@ const App = () => {
 						<AuthProvider>
 							<UpdateImages />
 						</AuthProvider>
-					),
+					)
 				},
-			],
-		},
+				{
+					path: "/edit-product/:id",
+					element: (
+						<AuthProvider>
+							<EditProduct />
+						</AuthProvider>
+					)
+				}
+			]
+		}
 	]);
+
 	return <RouterProvider router={router} />;
 };
 

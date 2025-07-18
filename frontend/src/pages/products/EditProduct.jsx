@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
 	FormField,
 	FormItem,
 	FormLabel,
-	FormMessage,
+	FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,19 +21,21 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
+	SelectValue
 } from "@/components/ui/select";
 import {
 	Card,
 	CardContent,
 	CardDescription,
 	CardHeader,
-	CardTitle,
+	CardTitle
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
-
-import { useAddProductMutation } from "@/services/products.js";
+import {
+	useGetOldProductQuery,
+	useUpdateProductMutation
+} from "@/services/products";
 
 const categoryData = [
 	"electronics",
@@ -42,7 +44,7 @@ const categoryData = [
 	"sports",
 	"toys",
 	"beauty",
-	"books",
+	"books"
 ];
 
 const formSchema = z.object({
@@ -50,24 +52,28 @@ const formSchema = z.object({
 	description: z
 		.string()
 		.min(1, { message: "Product Description is required" })
-		.max(16, {
-			message: "description must not be longer than 160 characters.",
+		.max(160, {
+			message: "description must not be longer than 160 characters."
 		}),
 	category: z.enum([...categoryData], {
-		message: "Please select a category",
+		message: "Please select a category"
 	}),
 	price: z.coerce
 		.number({ message: "Please Enter a price" })
 		.min(1000, { message: "Price must be at least 1000" })
 		.max(1000000, { message: "Price cannot exceed 1,000,000" }),
 	warranty: z.boolean().default(false),
-	voucher: z.boolean().default(false),
+	voucher: z.boolean().default(false)
 });
 
-export default function MyForm() {
+export default function EditProduct() {
 	const navigate = useNavigate();
+	const { id } = useParams();
 
-	const [addProduct, { isLoading }] = useAddProductMutation();
+	const { data, isLoading, error, isFetching } = useGetOldProductQuery(id);
+	const [updateProductMutation, { isLoading: updateIsLoading }] =
+		useUpdateProductMutation(id);
+
 	const form = useForm({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
@@ -76,133 +82,148 @@ export default function MyForm() {
 			category: "",
 			price: "",
 			warranty: false,
-			voulcher: false,
-		},
+			voucher: false
+		}
 	});
 
-	const onSubmit = async (values) => {
+	const onSubmit = async values => {
+		const data = { ...values, id };
 		try {
-			console.log(values);
-			const res = await addProduct(values).unwrap();
-			toast.success(res?.message || "success");
-			navigate("/products");
+			const res = await updateProductMutation(data).unwrap();
+
+			toast.success("Product updated successfully!");
+			navigate(`/product/${id}`);
 		} catch (error) {
-			console.error("Form submission error", error);
-			toast.error("Failed to submit the form. Please try again.");
+			console.error("Update failed", error);
+			toast.error("Failed to update product.");
 		}
 	};
 
+	useEffect(() => {
+		if (data) {
+			form.reset({
+				name: data.name,
+				description: data.description,
+				category: "electronics",
+				price: data.price,
+				warranty: data.warranty,
+				voucher: data.voucher
+			});
+		}
+	}, [data]);
+
+	if (error) {
+		return <p>{error.data?.message}</p>;
+	}
+	if (isLoading || isFetching) {
+		return <p>Getting product...</p>;
+	}
+
 	return (
-		<div className='h-full flex justify-center items-center'>
-			<Card className='w-full max-w-2xl'>
-				<CardHeader className='space-y-1'>
-					<CardTitle className='text-2xl font-bold text-center'>
-						Add to Product
+		<div className="h-full flex justify-center items-center">
+			<Card className="w-full max-w-2xl">
+				<CardHeader className="space-y-1">
+					<CardTitle className="text-2xl font-bold text-center">
+						Edit Product
 					</CardTitle>
-					<CardDescription className='text-center'>
-						Enter your email and password to access your account
+					<CardDescription className="text-center">
+						Update the product details below.
 					</CardDescription>
 				</CardHeader>
-				<CardContent className='space-y-6'>
+				<CardContent className="space-y-6">
 					<Form {...form}>
 						<form
 							onSubmit={form.handleSubmit(onSubmit)}
-							className='space-y-4'>
+							className="space-y-4">
+							{/* name */}
 							<FormField
 								control={form.control}
-								name='name'
+								name="name"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>Product Name</FormLabel>
 										<FormControl>
 											<Input
-												placeholder='I phone X'
-												type='text'
+												placeholder="Product name"
+												type="text"
 												{...field}
 											/>
 										</FormControl>
-										<FormDescription>
-											Enter your name of your product
-										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
 
+							{/* description */}
 							<FormField
 								control={form.control}
-								name='description'
+								name="description"
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel>
-											Product Description{" "}
+											Product Description
 										</FormLabel>
 										<FormControl>
 											<Textarea
-												placeholder='6.1-inch, 48MP camera'
-												className='resize-none h-20'
+												placeholder="Short description"
+												className="resize-none h-20"
 												{...field}
 											/>
 										</FormControl>
-										<FormDescription>
-											Tell us a little bit about your
-											products
-										</FormDescription>
 										<FormMessage />
 									</FormItem>
 								)}
 							/>
-							<div className='grid grid-cols-12 gap-4'>
-								<div className='col-span-6'>
+
+							{/* category + price */}
+							<div className="grid grid-cols-12 gap-4">
+								<div className="col-span-6">
 									<FormField
 										control={form.control}
-										name='category'
+										name="category"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>
-													Product Category
-												</FormLabel>
+												<FormLabel>Category</FormLabel>
 												<Select
 													onValueChange={
 														field.onChange
 													}
-													defaultValue={field.value}>
+													defaultValue={
+														data?.category // idk why don't working field.value
+													}>
 													<FormControl>
-														<SelectTrigger className='w-full'>
-															<SelectValue placeholder='category' />
+														<SelectTrigger className="w-full">
+															<SelectValue placeholder="Select category" />
 														</SelectTrigger>
 													</FormControl>
 													<SelectContent>
 														{categoryData.map(
-															(cat) => (
+															cat => (
 																<SelectItem
 																	key={cat}
 																	value={cat}>
 																	{cat}
 																</SelectItem>
-															),
+															)
 														)}
 													</SelectContent>
 												</Select>
-
 												<FormMessage />
 											</FormItem>
 										)}
 									/>
 								</div>
-								<div className='col-span-6'>
+
+								<div className="col-span-6">
 									<FormField
 										control={form.control}
-										name='price'
+										name="price"
 										render={({ field }) => (
 											<FormItem>
-												<FormLabel>
-													Product Price
-												</FormLabel>
+												<FormLabel>Price</FormLabel>
 												<FormControl>
 													<Input
-														placeholder='1000 to 100Lakh'
-														type='number'
+														type="number"
 														{...field}
 													/>
 												</FormControl>
@@ -213,49 +234,48 @@ export default function MyForm() {
 								</div>
 							</div>
 
-							<div className='grid grid-cols-12 gap-4'>
-								<div className='col-span-6'>
+							{/* warranty + voucher */}
+							<div className="grid grid-cols-12 gap-4">
+								<div className="col-span-6">
 									<FormField
 										control={form.control}
-										name='warranty'
+										name="warranty"
 										render={({ field }) => (
 											<FormItem
-												className={`flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 ${
-													field.value
-														? "border-blue-600  bg-blue-50 dark:border-blue-900 dark:bg-blue-950"
-														: ""
-												}`}>
+												className={cn(
+													"flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4",
+													field.value &&
+														"border-blue-600 bg-blue-50"
+												)}>
 												<FormControl>
 													<Checkbox
 														checked={field.value}
 														onCheckedChange={
 															field.onChange
 														}
-														className=''
 													/>
 												</FormControl>
-												<div className='space-y-1 leading-none'>
+												<div className="space-y-1 leading-none">
 													<FormLabel>
 														Warranty
 													</FormLabel>
-													<FormMessage />
 												</div>
 											</FormItem>
 										)}
 									/>
 								</div>
 
-								<div className='col-span-6'>
+								<div className="col-span-6">
 									<FormField
 										control={form.control}
-										name='voulcher'
+										name="voucher"
 										render={({ field }) => (
 											<FormItem
-												className={`flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 ${
-													field.value
-														? "border-blue-600  bg-blue-50 dark:border-blue-900 dark:bg-blue-950"
-														: ""
-												}`}>
+												className={cn(
+													"flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4",
+													field.value &&
+														"border-blue-600 bg-blue-50"
+												)}>
 												<FormControl>
 													<Checkbox
 														checked={field.value}
@@ -264,19 +284,22 @@ export default function MyForm() {
 														}
 													/>
 												</FormControl>
-												<div className='space-y-1 leading-none'>
+												<div className="space-y-1 leading-none">
 													<FormLabel>
-														Voulcher
+														Voucher
 													</FormLabel>
-
-													<FormMessage />
 												</div>
 											</FormItem>
 										)}
 									/>
 								</div>
 							</div>
-							<Button type='submit'>Add Product</Button>
+
+							<Button type="submit">
+								{updateIsLoading
+									? "loading..."
+									: "Update Product"}
+							</Button>
 						</form>
 					</Form>
 				</CardContent>

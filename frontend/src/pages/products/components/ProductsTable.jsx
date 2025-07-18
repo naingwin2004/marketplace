@@ -125,7 +125,10 @@ export const ProductsTable = ({ data }) => {
 											</DropdownMenuLabel>
 											<DropdownMenuSeparator />
 											<DropdownMenuItem>
-												Edit product
+												<Link
+													to={`/edit-product/${product?._id}`}>
+													Edit Product
+												</Link>
 											</DropdownMenuItem>
 											<DropdownMenuItem>
 												<Link

@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import {toast} from "sonner";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -11,7 +11,7 @@ import {
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
-	DialogTitle,
+	DialogTitle
 } from "@/components/ui/dialog";
 import {
 	Form,
@@ -20,42 +20,42 @@ import {
 	FormField,
 	FormItem,
 	FormLabel,
-	FormMessage,
+	FormMessage
 } from "@/components/ui/form";
 import { Camera, User } from "lucide-react";
 
 import { useChangePasswordMutation } from "@/services/auth.js";
 const profileFormSchema = z.object({
 	password: z.string().nonempty({
-		message: "Password is required.",
+		message: "Password is required."
 	}),
 	newPassword: z
 		.string()
 		.min(8, {
-			message: "Password must be at least 8 characters.",
+			message: "Password must be at least 8 characters."
 		})
 		.regex(/[a-zA-Z]/, {
-			message: "Password must contain at least one letter.",
+			message: "Password must contain at least one letter."
 		})
 		.regex(/[0-9]/, {
-			message: "Password must contain at least one number.",
+			message: "Password must contain at least one number."
 		})
 		.regex(/[^a-zA-Z0-9]/, {
-			message: "Password must contain at least one special character.",
-		}),
+			message: "Password must contain at least one special character."
+		})
 });
 
 const ChangePassword = ({ setChangePassOpen }) => {
 	const [changePasswordMutation, { isLoading }] = useChangePasswordMutation();
 
-	const email = useSelector((state) => state.auth?.user?.email);
+	const email = useSelector(state => state.auth?.user?.email);
 
 	const form = useForm({
 		resolver: zodResolver(profileFormSchema),
 		defaultValues: {
 			password: "",
-			newPassword: "",
-		},
+			newPassword: ""
+		}
 	});
 
 	async function onSubmit(values) {
@@ -71,7 +71,7 @@ const ChangePassword = ({ setChangePassOpen }) => {
 		}
 	}
 
-	const handleImage = (e) => {
+	const handleImage = e => {
 		const file = e.target.files[0];
 		if (file) {
 			const imageUrl = URL.createObjectURL(file);
@@ -80,7 +80,7 @@ const ChangePassword = ({ setChangePassOpen }) => {
 		}
 	};
 	return (
-		<DialogContent className='sm:max-w-[600px] max-h-[80vh] overflow-y-auto'>
+		<DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
 			<DialogHeader>
 				<DialogTitle>ChangePassword</DialogTitle>
 				<DialogDescription>
@@ -92,16 +92,16 @@ const ChangePassword = ({ setChangePassOpen }) => {
 			<Form {...form}>
 				<form
 					onSubmit={form.handleSubmit(onSubmit)}
-					className='space-y-6'>
+					className="space-y-6">
 					<FormField
 						control={form.control}
-						name='password'
+						name="password"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>Password</FormLabel>
 								<FormControl>
 									<Input
-										placeholder='Enter current password'
+										placeholder="Enter current password"
 										{...field}
 									/>
 								</FormControl>
@@ -112,13 +112,13 @@ const ChangePassword = ({ setChangePassOpen }) => {
 					/>
 					<FormField
 						control={form.control}
-						name='newPassword'
+						name="newPassword"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel>New Password</FormLabel>
 								<FormControl>
 									<Input
-										placeholder='Enter new password'
+										placeholder="Enter new password"
 										{...field}
 									/>
 								</FormControl>
@@ -128,16 +128,14 @@ const ChangePassword = ({ setChangePassOpen }) => {
 						)}
 					/>
 
-					<div className='flex justify-end space-x-2'>
+					<div className="flex justify-end space-x-2">
 						<Button
-							type='button'
-							variant='outline'
+							type="button"
+							variant="outline"
 							onClick={() => setChangePassOpen(false)}>
 							Cancel
 						</Button>
-						<Button
-							type='submit'
-							disabled={isLoading}>
+						<Button type="submit" disabled={isLoading}>
 							{isLoading ? "Saving..." : "Save Changes"}
 						</Button>
 					</div>

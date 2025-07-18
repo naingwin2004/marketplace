@@ -22,30 +22,30 @@ export const updateImage = async (req, res) => {
 			const uploadResponse = await cloudinary.uploader.upload(
 				cover.path,
 				{
-					folder: "cover_images",
-				},
+					folder: "cover_images"
+				}
 			);
 			console.log(uploadResponse);
 
 			product.coverImage = {
 				url: uploadResponse.secure_url,
 				id: uploadResponse.public_id,
-				name: uploadResponse.display_name,
+				name: uploadResponse.display_name
 			};
 		}
 		if (images) {
-			const uploadPromises = images.map(async (img) => {
+			const uploadPromises = images.map(async img => {
 				const uploadResponse = await cloudinary.uploader.upload(
 					img.path,
 					{
-						folder: "array_images",
-					},
+						folder: "array_images"
+					}
 				);
 
 				return {
 					url: uploadResponse.secure_url,
 					id: uploadResponse.public_id,
-					name: uploadResponse.display_name,
+					name: uploadResponse.display_name
 				};
 			});
 
@@ -76,10 +76,24 @@ export const getImages = async (req, res) => {
 		return res.status(200).json({
 			coverImage: product.coverImage,
 			arrayImages: product.arrayImages,
-			name: product.name,
+			name: product.name
 		});
 	} catch (err) {
 		console.log("Error in getImages :", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const getOldProduct = async (req, res) => {
+	const { id } = req.params;
+	try {
+		const product = await Product.findById(id);
+		if (!product) {
+			return res.status(400).json({ message: "No product found" });
+		}
+		return res.status(200).json(product);
+	} catch (err) {
+		console.log("Error in getOldProduct :", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };
@@ -103,13 +117,41 @@ export const deleteImage = async (req, res) => {
 		}
 		await cloudinary.uploader.destroy(imageId);
 		const filterProduct = product.arrayImages.filter(
-			(image) => image.id !== imageId,
+			image => image.id !== imageId
 		);
 		product.arrayImages = filterProduct;
 		await product.save();
 		return res.status(200).json({ message: "deleteImage success" });
 	} catch (err) {
 		console.log("Error in deleteImage:", err.message);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const updateProduct = async (req, res) => {
+	const { id, name, description, category, price, voucher, warranty } =
+		req.body;
+
+	try {
+		const product = await Product.findById(id);
+
+		if (!product) {
+			return res.status(400).json({ message: "No product found" });
+		}
+		if (product.seller.toString() !== req.userId.toString()) {
+			return res.status(400).json({ message: "is not your product" });
+		}
+		product.name = name;
+		product.description = description;
+		product.category = category;
+		product.price = price;
+		product.voucher = voucher;
+		product.warranty = warranty;
+		await product.save();
+
+		return res.status(200).json({ message: "product updated" });
+	} catch (err) {
+		console.error("Error in updateProduct:", err);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };

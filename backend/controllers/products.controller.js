@@ -7,7 +7,7 @@ export const publicProducts = async (req, res) => {
 		const { page = 1, search, sortby = "newest", category } = req.query;
 
 		let filter = {
-			status: "active",
+			status: "active"
 		};
 
 		if (category) {
@@ -17,7 +17,7 @@ export const publicProducts = async (req, res) => {
 		if (search) {
 			filter.$or = [
 				{ name: { $regex: search, $options: "i" } },
-				{ description: { $regex: search, $options: "i" } },
+				{ description: { $regex: search, $options: "i" } }
 			];
 		}
 
@@ -39,21 +39,21 @@ export const publicProducts = async (req, res) => {
 			.skip((validPage - 1) * limit)
 			.limit(limit);
 
-		const selectedProducts = products.map((product) => ({
+		const selectedProducts = products.map(product => ({
 			_id: product._id,
 			name: product.name,
 			description: product.description,
 			category: product.category,
 			price: product.price,
 			coverImage: product.coverImage,
-			createdAt: product.createdAt,
+			createdAt: product.createdAt
 		}));
 
 		return res.status(200).json({
 			products: selectedProducts,
 			totalProducts,
 			currentPage: validPage,
-			totalPages,
+			totalPages
 		});
 	} catch (err) {
 		console.log("Error in publicProducts :", err.message);
@@ -67,12 +67,12 @@ export const productDetails = async (req, res) => {
 	try {
 		if (!mongoose.Types.ObjectId.isValid(id)) {
 			return res.status(400).json({
-				message: " Invalid product ID",
+				message: " Invalid product ID"
 			});
 		}
 		const product = await Product.findById(id).populate(
 			"seller",
-			"_id username avatar email role bio",
+			"_id username avatar email role bio"
 		);
 
 		if (!product) {
@@ -97,12 +97,12 @@ export const addProduct = async (req, res) => {
 			price,
 			warranty,
 			voucher,
-			seller: req.userId,
+			seller: req.userId
 		});
 		await product.save();
 
 		return res.status(201).json({
-			message: "product created",
+			message: "product created"
 		});
 	} catch (err) {
 		console.log("Error in addProduct :", err.message);
@@ -128,7 +128,7 @@ export const getProducts = async (req, res) => {
 
 		const totalProducts = await Product.countDocuments({
 			seller: req.userId,
-			...filter,
+			...filter
 		});
 		const totalPages = Math.ceil(totalProducts / limit);
 		const validPage = Math.max(1, Math.min(page, totalPages));
@@ -145,7 +145,7 @@ export const getProducts = async (req, res) => {
 			products,
 			totalPages,
 			currentPage: validPage,
-			totalProducts,
+			totalProducts
 		});
 	} catch (err) {
 		console.log("Error in getProducts :", err.message);

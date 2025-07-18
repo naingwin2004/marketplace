@@ -6,82 +6,82 @@ export const authApi = createApi({
 	reducerPath: "authApi",
 	baseQuery: baseQueryWithReauth,
 
-	endpoints: (builder) => ({
+	endpoints: builder => ({
 		login: builder.mutation({
-			query: (payload) => ({
+			query: payload => ({
 				url: "auth/login",
 				method: "POST",
-				body: payload,
-			}),
+				body: payload
+			})
 		}),
 
 		register: builder.mutation({
-			query: (payload) => ({
+			query: payload => ({
 				url: "auth/register",
 				method: "POST",
-				body: payload,
-			}),
+				body: payload
+			})
 		}),
 
 		logout: builder.mutation({
 			query: () => ({
 				url: "auth/logout",
-				method: "POST",
-			}),
+				method: "POST"
+			})
 		}),
 
 		verifyEmail: builder.mutation({
-			query: (data) => ({
+			query: data => ({
 				url: "auth/verifyEmail",
 				method: "POST",
-				body: data,
-			}),
+				body: data
+			})
 		}),
 
 		resendOtp: builder.mutation({
-			query: (email) => ({
+			query: email => ({
 				url: "auth/resendOtp",
 				method: "POST",
-				body: email,
-			}),
+				body: email
+			})
 		}),
 
 		forgotPassword: builder.mutation({
-			query: (email) => ({
+			query: email => ({
 				url: "auth/forgotPassword",
 				method: "POST",
-				body: email,
-			}),
+				body: email
+			})
 		}),
 
 		resetPassword: builder.mutation({
 			query: ({ token, values }) => ({
 				url: `auth/resetPassword/${token}`,
 				method: "POST",
-				body: values,
-			}),
+				body: values
+			})
 		}),
 
 		changePassword: builder.mutation({
-			query: (payload) => ({
+			query: payload => ({
 				url: "auth/changePassword",
 				method: "POST",
-				body: payload,
-			}),
+				body: payload
+			})
 		}),
 
 		updatedProfile: builder.mutation({
-			query: (formData) => ({
+			query: formData => ({
 				url: "auth/updatedProfile",
 				method: "PATCH",
-				body: formData,
-			}),
+				body: formData
+			})
 		}),
 
 		checkAuth: builder.query({
-			query: () => "auth/checkAuth",
-		}),
-	}),
+			query: () => "auth/checkAuth"
+		})
+	})
 });
 
 export const {
@@ -95,6 +95,5 @@ export const {
 	useChangePasswordMutation,
 	useUpdatedProfileMutation,
 
-	useCheckAuthQuery,
-	
+	useCheckAuthQuery
 } = authApi;

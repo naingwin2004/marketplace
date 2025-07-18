@@ -5,13 +5,15 @@ import {
 	productDetails,
 	addProduct,
 	getProducts,
-	deleteProduct,
+	deleteProduct
 } from "../controllers/products.controller.js";
 
 import {
 	updateImage,
 	getImages,
 	deleteImage,
+	getOldProduct,
+	updateProduct
 } from "../controllers/products.service.js";
 
 import { authMiddleware } from "../middleware/authMiddleware.js";
@@ -22,18 +24,20 @@ const productsRouter = express.Router();
 
 productsRouter.get("/", authMiddleware, getProducts);
 productsRouter.get("/publicProducts", publicProducts);
-productsRouter.get("/:id", authMiddleware, productDetails);
 productsRouter.get("/images/:id", authMiddleware, getImages);
+productsRouter.get("/:id", authMiddleware, productDetails);
+productsRouter.get("/oldProduct/:id", authMiddleware, getOldProduct);
 
 productsRouter.post("/add", authMiddleware, addProduct);
+productsRouter.post("/update", authMiddleware, updateProduct);
 productsRouter.post(
 	"/:id",
 	upload.fields([
 		{ name: "cover", maxCount: 1 },
-		{ name: "images", maxCount: 4 },
+		{ name: "images", maxCount: 4 }
 	]),
 	authMiddleware,
-	updateImage,
+	updateImage
 );
 
 productsRouter.delete("/delete-image", authMiddleware, deleteImage);
