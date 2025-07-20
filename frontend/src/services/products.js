@@ -4,7 +4,7 @@ import { baseQueryWithReauth } from "./baseQueryWithReauth.js";
 export const productsApi = createApi({
 	reducerPath: "productsApi",
 	baseQuery: baseQueryWithReauth,
-	tagTypes: ["Products", "Product"],
+	tagTypes: ["Products", "Product", "Save"],
 
 	endpoints: builder => ({
 		publicProducts: builder.query({
@@ -107,6 +107,7 @@ export const productsApi = createApi({
 				{ type: "Product", id }
 			]
 		}),
+
 		updateProduct: builder.mutation({
 			query: data => ({
 				url: `/products/update`,
@@ -118,7 +119,33 @@ export const productsApi = createApi({
 			]
 		}),
 
-		// These endpoints don't need tags as they're only used for editing
+		saveProduct: builder.mutation({
+			query: id => ({
+				url: "/products/save",
+				method: "POST",
+				body: { id }
+			}),
+			invalidatesTags: (result, error, id) => [
+				{ type: "Save", id: "LIST" }
+			]
+		}),
+
+		getSaveProduct: builder.query({
+			query: () => `/products/getSave`,
+			providesTags: [{ type: "Save", id: "LIST" }]
+		}),
+
+		unSaveProduct: builder.mutation({
+			query: id => ({
+				url: "/products/unSave",
+				method: "DELETE",
+				body: { id }
+			}),
+			invalidatesTags: (result, error, id) => [
+				{ type: "Save", id: "LIST" }
+			]
+		}),
+
 		getImages: builder.query({
 			query: id => `/products/images/${id}`,
 			providesTags: (result, error, id) => [{ type: "Product", id }]
@@ -137,10 +164,13 @@ export const {
 	useProductsQuery,
 	useGetImagesQuery,
 	useGetOldProductQuery,
+	useGetSaveProductQuery,
 
 	useAddProductMutation,
 	useDeleteImageMutation,
 	useDeleteProductMutation,
 	useUpdateImageMutation,
-	useUpdateProductMutation
+	useUpdateProductMutation,
+	useSaveProductMutation,
+	useUnSaveProductMutation
 } = productsApi;

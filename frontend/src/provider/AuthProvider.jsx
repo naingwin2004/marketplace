@@ -12,15 +12,15 @@ const AuthProvider = ({ children }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { token, user } = useSelector((state) => state.auth);
+	const { token, user } = useSelector(state => state.auth);
 	const isVerified = user?.isVerified;
 
 	// Only call API if token exists
 	const { data, error, isError, isLoading, isSuccess } = useCheckAuthQuery(
 		token ? undefined : skipToken,
 		{
-			skip: !token,
-		},
+			skip: !token
+		}
 	);
 
 	const [logoutApi] = useLogoutMutation();
@@ -81,7 +81,7 @@ const AuthProvider = ({ children }) => {
 
 	if (isLoading) {
 		return (
-			<div className='h-full flex justify-center items-center'>
+			<div className="h-full flex justify-center items-center">
 				<p>Checking authentication...</p>
 			</div>
 		);

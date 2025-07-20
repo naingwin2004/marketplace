@@ -45,13 +45,18 @@ const Home = () => {
 
 	const viewRef = useRef(null);
 
-	const { data, isLoading, error, isError, isFetching } =
-		usePublicProductsQuery({
-			page,
-			waitSearchQuery,
-			sortby,
-			selectedCategory
-		});
+	const {
+		data,
+		isLoading ,
+		error,
+		isError,
+		isFetching
+	} = usePublicProductsQuery({
+		page,
+		waitSearchQuery,
+		sortby,
+		selectedCategory
+	});
 
 	useEffect(() => {
 		const time = setTimeout(() => {
@@ -63,8 +68,6 @@ const Home = () => {
 	const isMobile = window.innerWidth < 768;
 
 	const [prevPage, setPrevPage] = useState(1);
-
-	
 
 	useEffect(() => {
 		if (page !== prevPage && isMobile) {

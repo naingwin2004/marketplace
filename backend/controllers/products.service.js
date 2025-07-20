@@ -1,4 +1,5 @@
 import Product from "../models/products.js";
+import Save from "../models/save.js";
 import mongoose from "mongoose";
 import cloudinary from "../middleware/cloudinary.js";
 
@@ -152,6 +153,94 @@ export const updateProduct = async (req, res) => {
 		return res.status(200).json({ message: "product updated" });
 	} catch (err) {
 		console.error("Error in updateProduct:", err);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const saveProduct = async (req, res) => {
+	const { id } = req.body;
+	try {
+		const canSave = 9;
+		const product = await Product.findById(id);
+
+		if (!product) {
+			return res.status(400).json({ message: "No product found" });
+		}
+		const isExists = await Save.findOne({
+			userId: req.userId,
+			productId: id
+		});
+		if (isExists) {
+			return res.status(400).json({
+				message: "Product was already saved!"
+			});
+		}
+
+		const savedCount = await Save.countDocuments({ userId: req.userId });
+		if (savedCount >= canSave) {
+			return res.status(400).json({
+				message: `You can only save up to ${canSave} products!`
+			});
+		}
+
+		const saveProduct = await Save.create({
+			productId: id,
+			userId: req.userId
+		});
+		await saveProduct.save();
+		return res.status(200).json({ message: "save successfully" });
+	} catch (err) {
+		console.error("Error in saveProduct:", err);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const getSaveProduct = async (req, res) => {
+	try {
+		const saveProduct = await Save.find({ userId: req.userId }).populate({
+			path: "productId",
+			select: "-voucher -warranty -arrayImages"
+		});
+
+		if (!saveProduct || saveProduct.length === 0) {
+			return res.status(400).json({ message: "No Save Product" });
+		}
+
+		return res.status(200).json(saveProduct);
+	} catch (err) {
+		console.error("Error in getSaveProduct:", err);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const unSave = async (req, res) => {
+	const userId = req.userId;
+	const id = req.body.id;
+
+	try {
+		const objectId = new mongoose.Types.ObjectId(id);
+		const saveProduct = await Save.findOne({
+			userId: userId,
+			productId: id
+		});
+
+		if (!saveProduct) {
+			return res.status(404).json({ message: "No saved product found!" });
+		}
+
+		if (saveProduct.userId.toString() !== userId.toString()) {
+			return res
+				.status(400)
+				.json({ message: "This is not your saved product" });
+		}
+
+		await saveProduct.deleteOne();
+
+		return res
+			.status(200)
+			.json({ message: "Product unsaved successfully" });
+	} catch (err) {
+		console.log("Error in unSave:", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
 	}
 };

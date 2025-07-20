@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
+import { toast } from "sonner";
 import { useSelector } from "react-redux";
 import { Heart, ArrowLeft, Check, X, Calendar } from "lucide-react";
 
@@ -13,17 +14,26 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatMMK } from "@/lib/formatMMK";
 import { formatDate } from "@/lib/formatDate";
 
-import { useProductDetailsQuery } from "@/services/products.js";
+import {
+	useProductDetailsQuery,
+	useSaveProductMutation,
+	useGetSaveProductQuery,
+	useUnSaveProductMutation
+} from "@/services/products.js";
 
 const ProductDetails = () => {
 	const navigate = useNavigate();
 	const { id } = useParams();
 	const [selectedImage, setSelectedImage] = useState(0);
-	const [isFavorite, setIsFavorite] = useState(false);
 
 	const user = useSelector(state => state.auth?.user?._id);
 
 	const { data, isLoading, error } = useProductDetailsQuery(id);
+	const { data: saveData } = useGetSaveProductQuery();
+	const isSaved = saveData?.some(item => item.productId?._id === data?._id);
+
+	const [saveProductMutation] = useSaveProductMutation();
+	const [unSaveProductMutation] = useUnSaveProductMutation();
 
 	if (error?.error) {
 		return (
@@ -55,6 +65,27 @@ const ProductDetails = () => {
 	);
 
 	const hasImages = productImages.length > 0;
+
+	const handleFav = async id => {
+		try {
+			const res = await saveProductMutation(id).unwrap();
+
+			toast.success(res?.message || "success");
+		} catch (err) {
+			console.error("Error in handleFav ", err);
+			toast.error(err?.data?.message);
+		}
+	};
+	const handleUnSave = async id => {
+		try {
+			const res = await unSaveProductMutation(id).unwrap();
+
+			toast.success(res?.message || "success");
+		} catch (err) {
+			console.error("Error in handleUnSave ", err);
+			toast.error(err?.data?.message);
+		}
+	};
 
 	return (
 		<div className="h-full flex flex-col space-y-6  max-w-6xl mx-3">
@@ -119,19 +150,28 @@ const ProductDetails = () => {
 						<div className="flex items-start justify-between">
 							<h1 className="text-3xl font-bold">{data?.name}</h1>
 
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={() => setIsFavorite(!isFavorite)}
-								className={`hover:bg-red-50 hover:text-red-500 ${
-									isFavorite ? "text-red-500" : ""
-								}`}>
-								<Heart
-									className={`h-5 w-5 ${
-										isFavorite ? "fill-current" : ""
-									}`}
-								/>
-							</Button>
+							{isSaved ? (
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => handleUnSave(data?._id)}
+									className="hover:bg-red-50 hover:text-red-500 text-red-500
+								">
+									<Heart
+										className={`h-5 w-5
+										fill-current
+									`}
+									/>
+								</Button>
+							) : (
+								<Button
+									variant="ghost"
+									size="icon"
+									onClick={() => handleFav(data?._id)}
+									className={`hover:bg-red-50 hover:text-red-500`}>
+									<Heart className={`h-5 w-5`} />
+								</Button>
+							)}
 						</div>
 
 						{/* Price */}
@@ -241,7 +281,7 @@ const ProductDetails = () => {
 
 					{/* Action Buttons */}
 					<div className="space-y-3 pt-4">
-						{user === data?.seller._id && (
+						{user === data?.seller?._id && (
 							<div className="flex space-x-3">
 								<Button
 									className="w-full"

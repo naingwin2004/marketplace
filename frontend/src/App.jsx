@@ -15,6 +15,7 @@ import AddProducts from "./pages/products/AddProducts";
 import ManageProducts from "./pages/products/ManageProducts";
 import UpdateImages from "./pages/products/UpdateImages";
 import EditProduct from "./pages/products/EditProduct";
+import Favorite from "./pages/products/Favorite";
 
 import NotFoundPage from "./pages/NotFoundPage.jsx";
 
@@ -123,6 +124,14 @@ const App = () => {
 					element: (
 						<AuthProvider>
 							<EditProduct />
+						</AuthProvider>
+					)
+				},
+				{
+					path: "/favorite",
+					element: (
+						<AuthProvider>
+							<Favorite />
 						</AuthProvider>
 					)
 				}
