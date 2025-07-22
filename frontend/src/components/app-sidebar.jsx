@@ -1,5 +1,5 @@
 import { toast } from "sonner";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import {
 	PackagePlus,
@@ -10,7 +10,7 @@ import {
 	LogIn,
 	UserPlus,
 	LogOut,
-	Store,
+	Store
 } from "lucide-react";
 
 import {
@@ -24,7 +24,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarRail,
+	SidebarRail
 } from "@/components/ui/sidebar";
 
 import { useLogoutMutation } from "@/services/auth.js";
@@ -35,28 +35,28 @@ const mainNavItems = [
 	{
 		name: "Add Products",
 		path: "/add-product",
-		icon: PackagePlus,
+		icon: PackagePlus
 	},
 	{
 		name: "Manage Products",
 		path: "/products",
-		icon: Boxes,
+		icon: Boxes
 	},
 	{
 		name: "Notifications",
 		path: "/notifications",
-		icon: BellRing,
+		icon: BellRing
 	},
 	{
 		name: "Favorite",
 		path: "/favorite",
-		icon: Heart,
+		icon: Heart
 	},
 	{
 		name: "Profile",
 		path: "/profile",
-		icon: UserCog,
-	},
+		icon: UserCog
+	}
 ];
 
 // Authentication items
@@ -64,19 +64,40 @@ const authItems = [
 	{
 		name: "Login",
 		path: "/login",
-		icon: LogIn,
+		icon: LogIn
 	},
 	{
 		name: "Register",
 		path: "/register",
-		icon: UserPlus,
+		icon: UserPlus
+	}
+];
+
+// Admin items
+const adminItems = [
+	{
+		name: "Dashboard",
+		path: "/dashboard",
+		icon: LogIn
 	},
+	{
+		name: "Manage User",
+		path: "/manageuser",
+		icon: UserPlus
+	},
+	{
+		name: "Admin Manage Products",
+		path: "/manageproducts",
+		icon: Boxes
+	}
 ];
 
 export function AppSidebar() {
 	const dispatch = useDispatch();
+	const location = useLocation();
 	const navigate = useNavigate();
-	const token = useSelector((state) => state.auth.token);
+	const token = useSelector(state => state.auth.token);
+	const user = useSelector(state => state.auth.user);
 
 	const [logoutMutation] = useLogoutMutation();
 
@@ -93,22 +114,20 @@ export function AppSidebar() {
 	};
 
 	return (
-		<Sidebar collapsible='icon'>
+		<Sidebar collapsible="icon">
 			<SidebarHeader>
 				<SidebarMenu>
 					<SidebarMenuItem>
-						<SidebarMenuButton
-							size='lg'
-							asChild>
-							<Link to='/'>
-								<div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
-									<Store className='size-4' />
+						<SidebarMenuButton size="lg" asChild>
+							<Link to="/">
+								<div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+									<Store className="size-4" />
 								</div>
-								<div className='grid flex-1 text-left text-sm leading-tight'>
-									<span className='truncate font-semibold'>
+								<div className="grid flex-1 text-left text-sm leading-tight">
+									<span className="truncate font-semibold">
 										ECSB
 									</span>
-									<span className='truncate text-xs'>
+									<span className="truncate text-xs">
 										Easy Connect Seller Buyer
 									</span>
 								</div>
@@ -119,19 +138,80 @@ export function AppSidebar() {
 			</SidebarHeader>
 
 			<SidebarContent>
+				{/* Admin Navigation */}
+				{user?.role === "admin" && !token && (
+					<SidebarGroup>
+						<SidebarGroupLabel>Admin Pendle</SidebarGroupLabel>
+						<SidebarGroupContent>
+							<SidebarMenu>
+								{adminItems.map(item => (
+									<SidebarMenuItem key={item?.name}>
+										{!token ? (
+											<SidebarMenuButton
+												disabled={true}
+												isActive={
+													location.pathname ===
+													item.path
+												}>
+												<Link
+													to={item?.path}
+													className="flex items-center space-x-2">
+													<item.icon size={16} />
+													<span>{item?.name}</span>
+												</Link>
+											</SidebarMenuButton>
+										) : (
+											<SidebarMenuButton
+												asChild
+												isActive={
+													location.pathname ===
+													item.path
+												}>
+												<Link to={item?.path}>
+													<item.icon size={16} />
+													<span>{item?.name}</span>
+												</Link>
+											</SidebarMenuButton>
+										)}
+									</SidebarMenuItem>
+								))}
+							</SidebarMenu>
+						</SidebarGroupContent>
+					</SidebarGroup>
+				)}
+
 				{/* Main Navigation */}
 				<SidebarGroup>
 					<SidebarGroupLabel>Main Menu</SidebarGroupLabel>
 					<SidebarGroupContent>
 						<SidebarMenu>
-							{mainNavItems.map((item) => (
+							{mainNavItems.map(item => (
 								<SidebarMenuItem key={item?.name}>
-									<SidebarMenuButton asChild>
-										<Link to={item?.path}>
-											<item.icon />
-											<span>{item?.name}</span>
-										</Link>
-									</SidebarMenuButton>
+									{!token ? (
+										<SidebarMenuButton
+											disabled={true}
+											isActive={
+												location.pathname === item.path
+											}>
+											<Link
+												to={item?.path}
+												className="flex items-center space-x-2">
+												<item.icon size={16} />
+												<span>{item?.name}</span>
+											</Link>
+										</SidebarMenuButton>
+									) : (
+										<SidebarMenuButton
+											asChild
+											isActive={
+												location.pathname === item.path
+											}>
+											<Link to={item?.path}>
+												<item.icon size={16} />
+												<span>{item?.name}</span>
+											</Link>
+										</SidebarMenuButton>
+									)}
 								</SidebarMenuItem>
 							))}
 						</SidebarMenu>
@@ -144,11 +224,17 @@ export function AppSidebar() {
 						<SidebarGroupLabel>Account</SidebarGroupLabel>
 						<SidebarGroupContent>
 							<SidebarMenu>
-								{authItems.map((item) => (
+								{authItems.map(item => (
 									<SidebarMenuItem key={item?.name}>
-										<SidebarMenuButton asChild>
-											<Link to={item?.path}>
-												<item.icon />
+										<SidebarMenuButton
+											asChild
+											isActive={
+												location.pathname === item.path
+											}>
+											<Link
+												to={item?.path}
+												className="flex space-x-2">
+												<item.icon size={16} />
 												<span>{item?.name}</span>
 											</Link>
 										</SidebarMenuButton>

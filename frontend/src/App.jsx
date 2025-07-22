@@ -31,7 +31,7 @@ const App = () => {
 		{
 			path: "/",
 			element: <Layout />,
-			/*	errorElement: <NotFoundPage />,*/
+			errorElement: <NotFoundPage />,
 			children: [
 				{
 					index: true,
