@@ -90,9 +90,9 @@ const App = () => {
 				{
 					path: "/product/:id",
 					element: (
-						<>
+						<AuthProvider>
 							<ProductDetails />
-						</>
+						</AuthProvider>
 					)
 				},
 				{

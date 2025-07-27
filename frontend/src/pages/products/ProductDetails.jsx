@@ -11,6 +11,8 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import CommentSection from "./components/CommentSection";
+
 import { formatMMK } from "@/lib/formatMMK";
 import { formatDate } from "@/lib/formatDate";
 
@@ -291,19 +293,18 @@ const ProductDetails = () => {
 										Edit Product
 									</Link>
 								</Button>
-								<Button
-									className="w-full"
-									variant="outline"
-									size="lg">
+								<Button className="w-full" size="lg">
 									<Link to={`/images/${data?._id}`}>
 										Update Images
 									</Link>
 								</Button>
 							</div>
 						)}
-						<Button className="w-full" size="lg">
-							Button 2
-						</Button>
+						<CommentSection
+							id={data?.seller?._id}
+							email={data?.seller?.email}
+							product={data}
+						/>
 					</div>
 				</div>
 			</div>

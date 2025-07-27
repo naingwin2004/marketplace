@@ -9,7 +9,7 @@ import {
 	PAUSE,
 	PERSIST,
 	PURGE,
-	REGISTER,
+	REGISTER
 } from "redux-persist";
 
 import { combineReducers } from "redux";
@@ -17,19 +17,21 @@ import { combineReducers } from "redux";
 import authReducer from "./features/auth.js";
 import { authApi } from "../services/auth.js";
 import { productsApi } from "../services/products.js";
+import { commentApi } from "../services/comment.js";
 
 // persist config
 const persistConfig = {
 	key: "root",
 	storage,
-	whitelist: ["auth"], // persist only 'auth' slice
+	whitelist: ["auth"] // persist only 'auth' slice
 };
 
 // Combine all reducers
 const rootReducer = combineReducers({
 	auth: authReducer,
 	[authApi.reducerPath]: authApi.reducer, // RTK Query API
-[productsApi.reducerPath]:productsApi.reducer
+	[productsApi.reducerPath]: productsApi.reducer,
+	[commentApi.reducerPath]: commentApi.reducer
 });
 
 // Create persisted reducer
@@ -39,7 +41,7 @@ const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
 	reducer: persistedReducer, // applie persisted
-	middleware: (getDefaultMiddleware) =>
+	middleware: getDefaultMiddleware =>
 		getDefaultMiddleware({
 			serializableCheck: {
 				ignoredActions: [
@@ -48,10 +50,13 @@ export const store = configureStore({
 					PAUSE,
 					PERSIST,
 					PURGE,
-					REGISTER,
-				],
-			},
-		}).concat(authApi.middleware).concat(productsApi.middleware),
+					REGISTER
+				]
+			}
+		})
+			.concat(authApi.middleware)
+			.concat(productsApi.middleware)
+			.concat(commentApi.middleware)
 });
 
 // Setup listeners for RTK Query
