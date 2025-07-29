@@ -1,14 +1,14 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import Layout from "./layout/Layout.jsx";
-import Home from "./layout/Home.jsx";
+import Layout from "./layout/Layout";
+import Home from "./layout/Home";
 
-import Login from "./pages/auth/Login.jsx";
-import Register from "./pages/auth/Register.jsx";
-import Profile from "./pages/auth/Profile.jsx";
-import OTPVerification from "./pages/auth/OTPVerification.jsx";
-import ForgotPassword from "./pages/auth/ForgotPassword.jsx";
-import ResetPassword from "./pages/auth/ResetPassword.jsx";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import Profile from "./pages/auth/Profile";
+import OTPVerification from "./pages/auth/OTPVerification";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 
 import ProductDetails from "./pages/products/ProductDetails";
 import AddProducts from "./pages/products/AddProducts";
@@ -17,21 +17,22 @@ import UpdateImages from "./pages/products/UpdateImages";
 import EditProduct from "./pages/products/EditProduct";
 import Favorite from "./pages/products/Favorite";
 
-import NotFoundPage from "./pages/NotFoundPage.jsx";
+import NotFoundPage from "./pages/NotFoundPage";
+import Notifications from "./pages/Notifications";
 
 import AuthProvider from "./provider/AuthProvider";
 
 import {
 	RedirectAuthenticatedUser,
 	ProtectedUnverifiedOnly
-} from "./provider/ProtectRoute.jsx";
+} from "./provider/ProtectRoute";
 
 const App = () => {
 	const router = createBrowserRouter([
 		{
 			path: "/",
 			element: <Layout />,
-			errorElement: <NotFoundPage />,
+			 errorElement: <NotFoundPage />,
 			children: [
 				{
 					index: true,
@@ -132,6 +133,14 @@ const App = () => {
 					element: (
 						<AuthProvider>
 							<Favorite />
+						</AuthProvider>
+					)
+				},
+				{
+					path: "/notifications",
+					element: (
+						<AuthProvider>
+							<Notifications />
 						</AuthProvider>
 					)
 				}

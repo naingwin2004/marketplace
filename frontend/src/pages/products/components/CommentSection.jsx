@@ -7,6 +7,8 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { formatDistanceToNow } from "date-fns";
+
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -17,6 +19,7 @@ import { useState, useEffect } from "react";
 import { Trash, Mail } from "lucide-react";
 import EmailDialog from "./EmailDialog";
 import { z } from "zod";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import {
 	useAddCommentMutation,
@@ -84,111 +87,115 @@ export default function CommentSection({ id, email, product }) {
 
 	return (
 		<div className="w-full space-y-4">
-			<div className="flex space-y-3 flex-col md:flex-row">
-				<Button
-					className="w-full"
-					size="lg"
-					variant="outline"
-					onClick={() => setShowComments(!showComments)}>
-					{showComments ? "Hide Comments" : "Show Comments"}
-				</Button>
-				<Dialog open={open} onOpenChange={setOpen}>
-					<DialogTrigger asChild>
-						<Button className="gap-2">
-							<Mail className="h-4 w-4" />
-							Compose Private Email
-						</Button>
-					</DialogTrigger>
-					<EmailDialog
-						setOpen={setOpen}
-						email={email}
-						productName={product.name}
-						productLink={`http://localhost:5173/product/${product._id}`}
-					/>
-				</Dialog>
-			</div>
+			<Dialog open={open} onOpenChange={setOpen}>
+				<DialogTrigger asChild>
+					<Button className="w-full">
+						<Mail className="h-4 w-4" />
+						Compose Private Email
+					</Button>
+				</DialogTrigger>
+				<EmailDialog
+					setOpen={setOpen}
+					email={email}
+					productName={product.name}
+					productLink={`http://localhost:5173/product/${product._id}`}
+				/>
+			</Dialog>
 
-			{showComments && (
-				<>
-					{userId !== id && (
-						<Card>
-							<CardContent className="p-4">
-								<Form {...form}>
-									<form
-										onSubmit={form.handleSubmit(onSubmit)}
-										className="space-y-3">
-										<FormField
-											control={form.control}
-											name="content"
-											render={({ field }) => (
-												<FormItem>
-													<FormControl>
-														<Textarea
-															placeholder="Write your comment..."
-															className="min-h-[100px] resize-none"
-															{...field}
-														/>
-													</FormControl>
-													<FormMessage />
-												</FormItem>
-											)}
-										/>
+			<>
+				{userId !== id && (
+					<Card>
+						<CardContent className="p-4">
+							<Form {...form}>
+								<form
+									onSubmit={form.handleSubmit(onSubmit)}
+									className="space-y-3">
+									<FormField
+										control={form.control}
+										name="content"
+										render={({ field }) => (
+											<FormItem>
+												<FormControl>
+													<Textarea
+														placeholder="Write your comment..."
+														className="min-h-[100px] resize-none"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
 
-										<div className="flex justify-end gap-2">
-											<Button
-												variant="ghost"
-												type="button"
-												onClick={() => form.reset()}>
-												Cancel
-											</Button>
-											<Button
-												type="submit"
-												disabled={isLoading}>
-												Post Comment
-											</Button>
-										</div>
-									</form>
-								</Form>
-							</CardContent>
-						</Card>
-					)}
+									<div className="flex justify-end gap-2">
+										<Button
+											variant="ghost"
+											type="button"
+											onClick={() => form.reset()}>
+											Cancel
+										</Button>
+										<Button
+											type="submit"
+											disabled={isLoading}>
+											Post Comment
+										</Button>
+									</div>
+								</form>
+							</Form>
+						</CardContent>
+					</Card>
+				)}
 
-					{isFetching && <p>Fetching comment... </p>}
-					{/* Comments Section */}
-					{comments.map(comment => (
-						<Card key={comment._id}>
-							<CardContent className="p-4">
-								<div className="space-y-2">
-									<div className="flex items-center gap-2">
+				{isFetching && <p>Fetching comment... </p>}
+				{/* Comments Section */}
+				{comments.map(comment => (
+					<Card key={comment._id}>
+						<CardContent className="p-4">
+							<div className="flex items-start gap-3">
+								<Avatar className="h-10 w-10">
+									<AvatarImage
+										src={comment?.userId.avatar.url}
+										alt={comment?.userId.avatar.name}
+									/>
+									<AvatarFallback>
+										{comment?.userId.username.charAt(0)}
+									</AvatarFallback>
+								</Avatar>
+								<div className="space-y-2 flex-1">
+									<div className="flex items-center justify-between mb-1">
 										<span className="font-medium text-sm">
 											{comment?.userId.username}
 										</span>
 										<span className="text-muted-foreground text-xs">
-											{comment?.createdAt}
+											{formatDistanceToNow(
+												new Date(comment?.createdAt),
+												{ addSuffix: true }
+											)
+												.replace("about ", "")
+												.replace("minute", "min")
+												.replace("second", "sec")}
 										</span>
 									</div>
 									<p className="text-sm">
 										{comment?.content}
 									</p>
 								</div>
-							</CardContent>
-							{comment.userId._id === userId && (
-								<CardFooter className="flex justify-end">
-									<Button
-										variant="destructive"
-										size="icon"
-										disabled={deletingComment}
-										onClick={() =>
-											handleDelete(comment._id)
-										}>
-										<Trash size={18} />
-									</Button>
-								</CardFooter>
-							)}
-						</Card>
-					))}
-				</>
-			)}
+							</div>
+						</CardContent>
+						{comment.userId._id === userId && (
+							<CardFooter className="flex justify-end">
+								<Button
+									variant="destructive"
+									size="icon"
+									disabled={deletingComment}
+									onClick={() => handleDelete(comment._id)}>
+									<Trash size={18} />
+								</Button>
+							</CardFooter>
+						)}
+					</Card>
+				))}
+			</>
 		</div>
 	);
 }

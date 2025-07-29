@@ -10,7 +10,8 @@ import {
 	LogIn,
 	UserPlus,
 	LogOut,
-	Store
+	Store,
+	LayoutDashboard, Users, PackageCheck
 } from "lucide-react";
 
 import {
@@ -74,22 +75,24 @@ const authItems = [
 ];
 
 // Admin items
-const adminItems = [
-	{
-		name: "Dashboard",
-		path: "/dashboard",
-		icon: LogIn
-	},
-	{
-		name: "Manage User",
-		path: "/manageuser",
-		icon: UserPlus
-	},
-	{
-		name: "Admin Manage Products",
-		path: "/manageproducts",
-		icon: Boxes
-	}
+ 
+
+const adminItems = [  
+  {  
+    name: "Dashboard",  
+    path: "/dashboard",  
+    icon: LayoutDashboard  
+  },  
+  {  
+    name: "Manage User",  
+    path: "/manageuser",  
+    icon: Users  
+  },  
+  {  
+    name: "Admin Manage Products",  
+    path: "/manageproducts",  
+    icon: PackageCheck  
+  }  
 ];
 
 export function AppSidebar() {
@@ -139,40 +142,23 @@ export function AppSidebar() {
 
 			<SidebarContent>
 				{/* Admin Navigation */}
-				{user?.role === "admin" && !token && (
+				{user?.role === "admin" && token && (
 					<SidebarGroup>
 						<SidebarGroupLabel>Admin Pendle</SidebarGroupLabel>
 						<SidebarGroupContent>
 							<SidebarMenu>
 								{adminItems.map(item => (
 									<SidebarMenuItem key={item?.name}>
-										{!token ? (
-											<SidebarMenuButton
-												disabled={true}
-												isActive={
-													location.pathname ===
-													item.path
-												}>
-												<Link
-													to={item?.path}
-													className="flex items-center space-x-2">
-													<item.icon size={16} />
-													<span>{item?.name}</span>
-												</Link>
-											</SidebarMenuButton>
-										) : (
-											<SidebarMenuButton
-												asChild
-												isActive={
-													location.pathname ===
-													item.path
-												}>
-												<Link to={item?.path}>
-													<item.icon size={16} />
-													<span>{item?.name}</span>
-												</Link>
-											</SidebarMenuButton>
-										)}
+										<SidebarMenuButton
+											asChild
+											isActive={
+												location.pathname === item.path
+											}>
+											<Link to={item?.path}>
+												<item.icon size={16} />
+												<span>{item?.name}</span>
+											</Link>
+										</SidebarMenuButton>
 									</SidebarMenuItem>
 								))}
 							</SidebarMenu>

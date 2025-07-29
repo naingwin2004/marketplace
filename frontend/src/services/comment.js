@@ -30,12 +30,19 @@ export const commentApi = createApi({
 				method: "DELETE"
 			}),
 			invalidatesTags: [{ type: "Comment", id: "LIST" }]
+		}),
+
+		// get notifications by user
+		getNotifications: builder.query({
+			query: () => `/comments/notifications`,
+			invalidatesTags: [{ type: "Comment", id: "LIST" }]
 		})
 	})
 });
 
 export const {
 	useGetCommentsQuery,
+	useGetNotificationsQuery,
 	useAddCommentMutation,
 	useDeleteCommentMutation
 } = commentApi;

@@ -1,11 +1,10 @@
 import mongoose from "mongoose";
 import Comment from "../models/comment.js";
 import Product from "../models/products.js";
+import Notification from "../models/notification.js";
 
-// Add Comment
 export const addComment = async (req, res) => {
 	const { productId, content } = req.body;
-
 	const userId = req.userId;
 
 	try {
@@ -22,7 +21,12 @@ export const addComment = async (req, res) => {
 			userId,
 			content
 		});
-		await comment.save();
+
+		await Notification.create({
+			from: userId,
+			to: product.seller,
+			commentId: comment._id
+		});
 
 		return res.status(201).json({ message: "Comment created" });
 	} catch (err) {
@@ -31,14 +35,13 @@ export const addComment = async (req, res) => {
 	}
 };
 
-// Get Comments for a specific product
 export const getComments = async (req, res) => {
 	const { productId } = req.query;
 
 	try {
 		const comments = await Comment.find({ productId })
 			.sort({ createdAt: -1 })
-			.populate("userId", "username");
+			.populate("userId", "username avatar");
 
 		if (!comments || comments.length === 0) {
 			return res.status(404).json({ message: "No comments Yet" });
@@ -51,25 +54,21 @@ export const getComments = async (req, res) => {
 	}
 };
 
-
 export const deleteComment = async (req, res) => {
 	const { commentId } = req.params;
 
 	try {
-
 		const comment = await Comment.findById(commentId);
 
 		if (!comment) {
 			return res.status(404).json({ message: "Comment not found" });
 		}
 
-
 		if (comment.userId.toString() !== req.userId.toString()) {
 			return res
 				.status(403)
 				.json({ message: "You can only delete your own comment" });
 		}
-
 
 		await comment.deleteOne();
 
@@ -79,5 +78,19 @@ export const deleteComment = async (req, res) => {
 	} catch (err) {
 		console.log("Error in deleteComment:", err.message);
 		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const getNotifications = async (req, res) => {
+	try {
+		const notifications = await Notification.find({ to: req.userId })
+			.sort({ createdAt: -1 })
+			.populate("from", "username avatar")
+			.populate("commentId", "content createdAt");
+
+		res.status(200).json(notifications);
+	} catch (err) {
+		console.log("Error in getNotifications:", err.message);
+		res.status(500).json({ message: "Internal Server Error" });
 	}
 };
