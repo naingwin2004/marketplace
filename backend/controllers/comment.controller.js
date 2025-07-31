@@ -86,11 +86,41 @@ export const getNotifications = async (req, res) => {
 		const notifications = await Notification.find({ to: req.userId })
 			.sort({ createdAt: -1 })
 			.populate("from", "username avatar")
-			.populate("commentId", "content createdAt");
+			.populate("commentId", "content createdAt productId");
 
 		res.status(200).json(notifications);
 	} catch (err) {
 		console.log("Error in getNotifications:", err.message);
+		res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const notificationRead = async (req, res) => {
+	const { id } = req.body;
+	const userId = req.user._id;
+
+	try {
+		const notification = await Notification.findById(id);
+
+		if (!notification) {
+			return res.status(404).json({ message: "Notification not found" });
+		}
+
+		if (notification.to.toString() !== userId.toString()) {
+			return res
+				.status(403)
+				.json({
+					message:
+						"You are not authorized to update this notification"
+				});
+		}
+
+		notification.isRead = true;
+		await notification.save();
+
+		return res.status(200).json(notification);
+	} catch (err) {
+		console.log("Error in notificationRead:", err.message);
 		res.status(500).json({ message: "Internal Server Error" });
 	}
 };

@@ -35,6 +35,14 @@ export const commentApi = createApi({
 		// get notifications by user
 		getNotifications: builder.query({
 			query: () => `/comments/notifications`,
+			providesTags: [{ type: "Comment", id: "LIST" }]
+		}),
+		notificationRead: builder.mutation({
+			query: id => ({
+				url: `/comments/notification`,
+				method: "PATCH",
+				body: id
+			}),
 			invalidatesTags: [{ type: "Comment", id: "LIST" }]
 		})
 	})
@@ -43,6 +51,7 @@ export const commentApi = createApi({
 export const {
 	useGetCommentsQuery,
 	useGetNotificationsQuery,
+	useNotificationReadMutation,
 	useAddCommentMutation,
 	useDeleteCommentMutation
 } = commentApi;

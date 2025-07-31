@@ -270,12 +270,12 @@ const ProductDetails = () => {
 								</div>
 								<div className="flex flex-col space-y-2 text-sm text-muted-foreground">
 									<p>Email : {data?.seller?.email}</p>
-									<p className="flex gap-1">
+								{data?.seller?.bio &&	<p className="flex gap-1">
 										<span className="shrink-0">Bio : </span>
 										<span className="break-all">
 											{data?.seller?.bio}
 										</span>
-									</p>
+									</p>}
 								</div>
 							</CardContent>
 						</Card>

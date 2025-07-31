@@ -1,22 +1,48 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-import { useGetNotificationsQuery } from "../services/comment.js";
+import {
+	useGetNotificationsQuery,
+	useNotificationReadMutation
+} from "../services/comment.js";
 
 export default function Notifications() {
 	const [notificationList, setNotificationList] = useState([]);
+	const navigate = useNavigate();
 
 	const { data, error, isLoading } = useGetNotificationsQuery();
+	const [notificationReadMutation] = useNotificationReadMutation();
 
-	const handleClick = id => {
+	const handleClick = async notification => {
+		// Optimistic UI update to set isRead to true immediately
 		setNotificationList(prev =>
 			prev.map(notif =>
-				notif._id === id ? { ...notif, isRead: true } : notif
+				notif._id === notification._id
+					? { ...notif, isRead: true }
+					: notif
 			)
 		);
+
+		// Call mutation to update the notification on the server
+		try {
+			await notificationReadMutation({ id: notification._id }).unwrap();
+			navigate(`/product/${notification.commentId.productId}`);
+		} catch (error) {
+			// Handle error if the mutation fails
+			console.log("Error updating notification:", error);
+			// Optionally revert the optimistic update if mutation fails
+			setNotificationList(prev =>
+				prev.map(notif =>
+					notif._id === notification._id
+						? { ...notif, isRead: false }
+						: notif
+				)
+			);
+		}
 	};
 
 	useEffect(() => {
@@ -46,7 +72,7 @@ export default function Notifications() {
 								? "border-l-4 border-l-blue-500"
 								: ""
 						}`}
-						onClick={() => handleClick(notification._id)}>
+						onClick={() => handleClick(notification)}>
 						<CardContent className="p-4">
 							<div className="flex items-start gap-3">
 								<Avatar className="h-10 w-10">
