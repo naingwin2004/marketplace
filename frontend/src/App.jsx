@@ -20,6 +20,9 @@ import Favorite from "./pages/products/Favorite";
 import NotFoundPage from "./pages/NotFoundPage";
 import Notifications from "./pages/Notifications";
 
+import AdminManageProducts from "./pages/admin/AdminManageProducts";
+import ManageUser from "./pages/admin/ManageUser";
+
 import AuthProvider from "./provider/AuthProvider";
 
 import {
@@ -32,7 +35,7 @@ const App = () => {
 		{
 			path: "/",
 			element: <Layout />,
-			 errorElement: <NotFoundPage />,
+			// errorElement: <NotFoundPage />,
 			children: [
 				{
 					index: true,
@@ -143,7 +146,23 @@ const App = () => {
 							<Notifications />
 						</AuthProvider>
 					)
-				}
+				},
+				{
+					path: "/admin/products",
+					element: (
+						<AuthProvider>
+							<AdminManageProducts />
+						</AuthProvider>
+					)
+				},
+				{
+					path: "/admin/users",
+					element: (
+						<AuthProvider>
+							<ManageUser />
+						</AuthProvider>
+					)
+				},
 			]
 		}
 	]);

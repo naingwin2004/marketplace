@@ -24,7 +24,7 @@ function UpdateImages() {
 	const {
 		data,
 		error: isImagesError,
-		isLoading: isImagesLoading,
+		isLoading: isImagesLoading
 	} = useGetImagesQuery(id);
 
 	const handleSubmit = async () => {
@@ -38,7 +38,7 @@ function UpdateImages() {
 			formData.append("cover", cover[0].file);
 
 			if (files && files.length > 0) {
-				files.forEach((file) => {
+				files.forEach(file => {
 					formData.append("images", file.file);
 				});
 			}
@@ -54,30 +54,24 @@ function UpdateImages() {
 	};
 
 	if (error || isImagesError) {
-		return <p>{error.data?.message || isImagesError.data?.message}</p>;
+		return <p>{error?.data?.message || isImagesError?.data?.message}</p>;
 	}
 	if (isImagesLoading) {
 		return <p>Loading images...</p>;
 	}
 
 	return (
-		<div className='h-full space-y-6 flex flex-col'>
-			<p className='text-2xl font-bold'>{data?.name}</p>
-			<div className='max-w-sm self-center space-y-6'>
-				<CoverImageUpload
-					setCover={setCover}
-					data={data?.coverImage}
-				/>
-				<Images
-					setFiles={setFiles}
-					data={data?.arrayImages}
-				/>
+		<div className="h-full space-y-6 flex flex-col">
+			<p className="text-2xl font-bold">{data?.name}</p>
+			<div className="max-w-sm self-center space-y-6">
+				<CoverImageUpload setCover={setCover} data={data?.coverImage} />
+				<Images setFiles={setFiles} data={data?.arrayImages} />
 				<Button
 					onClick={handleSubmit}
 					disabled={isLoading}
-					className='w-full'>
+					className="w-full">
 					{isLoading ? (
-						<LoaderCircle className='animate-spin w-4 h-4' />
+						<LoaderCircle className="animate-spin w-4 h-4" />
 					) : (
 						"Submit"
 					)}

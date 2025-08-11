@@ -112,6 +112,7 @@ export const addProduct = async (req, res) => {
 
 export const getProducts = async (req, res) => {
 	const { search, page = 1, status, category } = req.query;
+
 	try {
 		let limit = 10;
 
@@ -163,7 +164,10 @@ export const deleteProduct = async (req, res) => {
 		if (!product) {
 			return res.status(404).json({ message: "Product not found" });
 		}
-		if (product.seller.toString() !== req.userId.toString()) {
+		if (
+			product.seller.toString() !== req.userId.toString() && // not the seller
+			req.role !== "admin" // and not an admin
+		) {
 			return res
 				.status(400)
 				.json({ message: "This is not your product" });

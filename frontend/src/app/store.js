@@ -18,6 +18,7 @@ import authReducer from "./features/auth.js";
 import { authApi } from "../services/auth.js";
 import { productsApi } from "../services/products.js";
 import { commentApi } from "../services/comment.js";
+import { adminApi } from "../services/admin.js";
 
 // persist config
 const persistConfig = {
@@ -31,7 +32,8 @@ const rootReducer = combineReducers({
 	auth: authReducer,
 	[authApi.reducerPath]: authApi.reducer, // RTK Query API
 	[productsApi.reducerPath]: productsApi.reducer,
-	[commentApi.reducerPath]: commentApi.reducer
+	[commentApi.reducerPath]: commentApi.reducer,
+	[adminApi.reducerPath]: adminApi.reducer
 });
 
 // Create persisted reducer
@@ -57,6 +59,7 @@ export const store = configureStore({
 			.concat(authApi.middleware)
 			.concat(productsApi.middleware)
 			.concat(commentApi.middleware)
+			.concat(adminApi.middleware)
 });
 
 // Setup listeners for RTK Query

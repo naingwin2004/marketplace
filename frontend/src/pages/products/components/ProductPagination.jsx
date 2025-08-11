@@ -5,7 +5,7 @@ import {
 	PaginationItem,
 	PaginationLink,
 	PaginationNext,
-	PaginationPrevious,
+	PaginationPrevious
 } from "@/components/ui/pagination";
 
 export const ProductPagination = ({ isFetching, data, page, setPage }) => {
@@ -13,14 +13,14 @@ export const ProductPagination = ({ isFetching, data, page, setPage }) => {
 		<>
 			{!isFetching &&
 				data?.totalPages > 1 &&
-				data?.products.length > 1 && (
+				 (
 					<Pagination className={isFetching && "pointer-events-none"}>
 						<PaginationContent>
 							{/* Previous Button */}
 							<PaginationItem>
 								<button
 									disabled={page <= 1}
-									className='disabled:pointer-events-none disabled:opacity-50'>
+									className="disabled:pointer-events-none disabled:opacity-50">
 									<PaginationPrevious
 										onClick={() => {
 											setPage(page - 1);
@@ -54,7 +54,7 @@ export const ProductPagination = ({ isFetching, data, page, setPage }) => {
 							<PaginationItem>
 								<button
 									disabled={page >= data.totalPages}
-									className='disabled:pointer-events-none disabled:opacity-50'>
+									className="disabled:pointer-events-none disabled:opacity-50">
 									<PaginationNext
 										onClick={() => {
 											setPage(page + 1);

@@ -22,9 +22,12 @@ import {
 	SelectValue
 } from "@/components/ui/select";
 
-import { useProductsQuery } from "@/services/products.js";
-import { ProductsTable } from "./components/ProductsTable";
-import { ProductPagination } from "./components/ProductPagination";
+import {
+	useGetProductsQuery,
+	
+} from "@/services/admin.js";
+import { ProductsTable } from "./ProductTable";
+import { ProductPagination } from "./ProductPagination";
 
 const categoryData = [
 	"electronics",
@@ -38,14 +41,14 @@ const categoryData = [
 
 const statusData = ["active", "pending", "reject"];
 
-const ManageProducts = () => {
+const AdminManageProducts = () => {
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
 	const [waitSearch, setWaitSearchQuery] = useState("");
 	const [category, setCategory] = useState("");
 	const [status, setStatus] = useState("");
 
-	const { data, error, isLoading, isFetching } = useProductsQuery(
+	const { data, error, isLoading, isFetching } = useGetProductsQuery(
 		{
 			page,
 			status,
@@ -76,7 +79,7 @@ const ManageProducts = () => {
 			</div>
 		);
 	}
-	if (isLoading || isFetching) {
+	if (isLoading && isFetching) {
 		return (
 			<div className="h-full flex justify-center items-center">
 				<p>Getting Products...</p>
@@ -131,20 +134,27 @@ const ManageProducts = () => {
 							setSearch("");
 							setCategory("");
 							setStatus("");
+							setWaitSearchQuery("");
 							setPage(1);
 						}}>
 						<X className="w-5 h-5" />
 					</Button>
 				</div>
 			</div>
-			{isFetching && <p className="text-center">Getting Products...</p>}
-			{data?.products.length == 0 ? (
+			{data?.products.length === 0 && (
 				<div className="flex flex-1 justify-center items-center">
 					<p className="text-2xl font-bold">No products Found...</p>
 				</div>
+			)}
+			{isFetching ? (
+				<p className="text-center">Getting Products...</p>
 			) : (
 				<ProductsTable data={data} />
 			)}
+
+			{data?.products.map(p => {
+				<p>{p.name}</p>;
+			})}
 
 			<ProductPagination
 				isFetching={isFetching}
@@ -156,4 +166,4 @@ const ManageProducts = () => {
 	);
 };
 
-export default ManageProducts;
+export default AdminManageProducts;

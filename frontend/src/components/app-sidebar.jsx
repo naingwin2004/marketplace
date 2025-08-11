@@ -11,7 +11,9 @@ import {
 	UserPlus,
 	LogOut,
 	Store,
-	LayoutDashboard, Users, PackageCheck
+	LayoutDashboard,
+	Users,
+	PackageCheck
 } from "lucide-react";
 
 import {
@@ -75,24 +77,23 @@ const authItems = [
 ];
 
 // Admin items
- 
 
-const adminItems = [  
-  {  
-    name: "Dashboard",  
-    path: "/dashboard",  
-    icon: LayoutDashboard  
-  },  
-  {  
-    name: "Manage User",  
-    path: "/manageuser",  
-    icon: Users  
-  },  
-  {  
-    name: "Admin Manage Products",  
-    path: "/manageproducts",  
-    icon: PackageCheck  
-  }  
+const adminItems = [
+	{
+		name: "Dashboard",
+		path: "/admin/dashboard",
+		icon: LayoutDashboard
+	},
+	{
+		name: "Manage User",
+		path: "/admin/users",
+		icon: Users
+	},
+	{
+		name: "Admin Manage Products",
+		path: "/admin/products",
+		icon: PackageCheck
+	}
 ];
 
 export function AppSidebar() {
