@@ -1,4 +1,5 @@
 import Product from "../models/products.js";
+import User from "../models/user.js";
 
 export const getProducts = async (req, res) => {
 	const { search, page = 1, status, category } = req.query;
@@ -66,6 +67,50 @@ export const updateProductStatus = async (req, res) => {
 		await product.save();
 
 		res.status(200).json({ message: "Product status updated", product });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const statusChangeUsers = async (req, res) => {
+	if (req.role !== "admin") {
+		return res.status(400).json({ message: "Admin only" });
+	}
+	const { id, status } = req.body;
+
+	try {
+		const user = await User.findById(id);
+
+		user.status = status;
+		await user.save();
+
+		return res.status(200).json({ message: "status change" });
+	} catch (error) {
+		console.error(error);
+		return res.status(500).json({ message: "Internal Server Error" });
+	}
+};
+
+export const getUsers = async (req, res) => {
+	if (req.role !== "admin") {
+		return res.status(400).json({ message: "Admin only" });
+	}
+
+	try {
+		const { status } = req.query;
+
+		let filter = {};
+
+		if (status) {
+			filter.status = status;
+		}
+
+		const users = await User.find(filter)
+			.sort({ createdAt: -1 })
+			.select("username email status createdAt role _id");
+
+		return res.status(200).json({ users });
 	} catch (error) {
 		console.error(error);
 		return res.status(500).json({ message: "Internal Server Error" });

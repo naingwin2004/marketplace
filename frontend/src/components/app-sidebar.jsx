@@ -81,7 +81,7 @@ const authItems = [
 const adminItems = [
 	{
 		name: "Dashboard",
-		path: "/admin/dashboard",
+		path: "/dashboard",
 		icon: LayoutDashboard
 	},
 	{

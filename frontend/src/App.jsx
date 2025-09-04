@@ -22,6 +22,7 @@ import Notifications from "./pages/Notifications";
 
 import AdminManageProducts from "./pages/admin/AdminManageProducts";
 import ManageUser from "./pages/admin/ManageUser";
+import Dashboard from "./pages/admin/Dashboard";
 
 import AuthProvider from "./provider/AuthProvider";
 
@@ -163,6 +164,14 @@ const App = () => {
 						</AuthProvider>
 					)
 				},
+				{
+					path: "/dashboard",
+					element: (
+						<AuthProvider>
+							<Dashboard />
+						</AuthProvider>
+					)
+				}
 			]
 		}
 	]);

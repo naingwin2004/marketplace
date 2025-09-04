@@ -5,9 +5,32 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 import UserTable from "./UserTable";
+import { useGetUsersQuery } from "../../services/admin";
 
 const ManageUser = () => {
 	const [search, setSearch] = useState("");
+	const [status, setStatus] = useState("");
+
+	const { data, isLoading, error, isError, isFetching } = useGetUsersQuery({
+		status
+	});
+
+	if (isLoading) {
+		return (
+			<div className="h-full flex justify-center items-center text-2xl font-medium">
+				Getting Users...
+			</div>
+		);
+	}
+
+	if (isError) {
+		return (
+			<div className="h-full flex justify-center items-center text-2xl font-medium">
+				{error.data ? error.data.message : "Somthing worng"}
+			</div>
+		);
+	}
+
 	return (
 		<div className="h-full flex flex-col space-y-6 ">
 			<div className="flex justify-center items-center space-x-3">
@@ -30,13 +53,23 @@ const ManageUser = () => {
 				</Button>
 			</div>
 			<div className="flex justify-center items-center space-x-3">
-				<Badge variant="outline">All</Badge>
-				<Badge>Active</Badge>
-				<Badge>Ban</Badge>
-				<Badge>CreatedAt</Badge>
+				{["", "active", "banned"].map(b => (
+					<Badge
+						key={b}
+						className="capitalize"
+						onClick={() => setStatus(b)}
+						variant={status == b ? "outline" : ""}>
+						{b === "" ? "All" : b}
+					</Badge>
+				))}
 			</div>
-			
-			<UserTable/>
+			{isFetching && <p className="text-center">Getting...</p>}
+			{!isFetching && data.users.length === 0 && (
+				<p className="font-medium text-2xl text-center"> No users</p>
+			)}
+			{!isFetching && data.users.length > 0 && (
+				<UserTable users={data.users} />
+			)}
 		</div>
 	);
 };

@@ -4,7 +4,7 @@ import { baseQueryWithReauth } from "./baseQueryWithReauth.js";
 export const adminApi = createApi({
 	reducerPath: "adminApi",
 	baseQuery: baseQueryWithReauth,
-	tagTypes: ["AdminProducts"],
+	tagTypes: ["AdminProducts", "AdminUsers"],
 	endpoints: builder => ({
 		getProducts: builder.query({
 			query: ({ waitSearch, page = 1, status, category }) => {
@@ -28,8 +28,36 @@ export const adminApi = createApi({
 				method: "PUT"
 			}),
 			invalidatesTags: ["AdminProducts"]
+		}),
+
+		getUsers: builder.query({
+			query: ({ status }) => {
+				const params = new URLSearchParams();
+				if (status) {
+					params.append("status", status);
+				}
+
+				return {
+					url: `admin/users?${params.toString()}`,
+					method: "GET"
+				};
+			},
+			providesTags: ["AdminUsers"]
+		}),
+		statusChange: builder.mutation({
+			query: ({ id, status }) => ({
+				url: "admin/users",
+				method: "POST",
+				body: { id, status }
+			}),
+			invalidatesTags: ["AdminUsers"]
 		})
 	})
 });
 
-export const { useGetProductsQuery, useUpdateProductStatusMutation } = adminApi;
+export const {
+	useGetProductsQuery,
+	useGetUsersQuery,
+	useUpdateProductStatusMutation,
+	useStatusChangeMutation
+} = adminApi;

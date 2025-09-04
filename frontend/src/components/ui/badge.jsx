@@ -14,20 +14,19 @@ const badgeVariants = cva(
 				destructive:
 					"border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
 				outline: "text-foreground",
-			},
+				emerald:
+					"border-transparent bg-emerald-500 text-primary-foreground shadow hover:bg-emerald-500/80"
+			}
 		},
 		defaultVariants: {
-			variant: "default",
-		},
-	},
+			variant: "default"
+		}
+	}
 );
 
 function Badge({ className, variant = "default", ...props }) {
 	return (
-		<div
-			className={cn(badgeVariants({ variant }), className)}
-			{...props}
-		/>
+		<div className={cn(badgeVariants({ variant }), className)} {...props} />
 	);
 }
 
